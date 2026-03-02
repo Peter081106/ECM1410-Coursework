@@ -1,2 +1,2 @@
-package cityrescue.enums;
+package enums;
 public enum IncidentType { MEDICAL, FIRE, CRIME }

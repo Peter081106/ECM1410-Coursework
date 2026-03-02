@@ -1,2 +1,2 @@
-package cityrescue.enums;
+package enums;
 public enum IncidentStatus { REPORTED, DISPATCHED, IN_PROGRESS, RESOLVED, CANCELLED }
