@@ -1,7 +1,9 @@
 package cityrescue;
 
 import cityrescue.enums.*;
+import classes.*;
 import cityrescue.exceptions.*;
+import java.util.ArrayList;
 
 /**
  * CityRescueImpl (Starter)
@@ -12,28 +14,64 @@ import cityrescue.exceptions.*;
 public class CityRescueImpl implements CityRescue {
 
     // TODO: add fields (map, arrays for stations/units/incidents, counters, tick, etc.)
+    private ArrayList<ArrayList<GridStatus>> grid;
+    private int current_tick=0;
 
     @Override
     public void initialise(int width, int height) throws InvalidGridException {
         // TODO: implement
+        current_tick=0;
+
+        try {
+            for (int x=0;x<height;x++){
+                ArrayList<GridStatus> row=new ArrayList<>();
+                for (int y=0;y<width;y++){
+                    row.add(GridStatus.OPEN);
+                }
+                grid.add(row);
+            }
+            CityMap map=new CityMap(grid);
+        } catch (InvalidGridException e){
+            System.out.println("Invalid value(s) used for grid initialisation");
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public int[] getGridSize() {
         // TODO: implement
+        int[] gridSize={grid.size(), grid.get(0).size()};
+        return gridSize;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void addObstacle(int x, int y) throws InvalidLocationException {
         // TODO: implement
+        try{
+            if (grid.get(x).get(y).equals(GridStatus.OPEN)){
+                grid.get(x).set(y, GridStatus.ROADBLOCK);
+            } else{
+                System.out.println("Location currently in use with a: "+grid.get(x).get(y));
+            }
+        } catch (InvalidLocationException e){
+            System.out.println("Selected location not in bounds");
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void removeObstacle(int x, int y) throws InvalidLocationException {
         // TODO: implement
+        try{
+            if (grid.get(x).get(y).equals(GridStatus.ROADBLOCK)){
+                grid.get(x).set(y, GridStatus.OPEN);
+            } else{
+                System.out.println("No roadblock in selected location");
+            }
+        }catch (InvalidLocationException e) {
+            System.out.println("Selected location out of bounds");
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
