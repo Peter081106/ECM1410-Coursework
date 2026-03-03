@@ -20,8 +20,6 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public void initialise(int width, int height) throws InvalidGridException {
         // TODO: implement
-        current_tick=0;
-
         try {
             for (int x=0;x<height;x++){
                 ArrayList<GridStatus> row=new ArrayList<>();
@@ -33,7 +31,8 @@ public class CityRescueImpl implements CityRescue {
             CityMap map=new CityMap(grid);
         } catch (InvalidGridException e){
             System.out.println("Invalid value(s) used for grid initialisation");
-        }
+        }        
+        current_tick=0;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

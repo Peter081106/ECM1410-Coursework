@@ -1,10 +1,10 @@
 package classes;
 
-import enums.GridStatus;
+import cityrescue.enums.GridStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CityMap{
+class CityMap{
     private ArrayList<ArrayList<GridStatus>> grid;
     private ArrayList<ArrayList<Integer>> obstacleLocations=new ArrayList<>();
     private boolean legalMove=false;
