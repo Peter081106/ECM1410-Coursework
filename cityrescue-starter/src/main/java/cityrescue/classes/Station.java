@@ -1,8 +1,8 @@
 public Station(){
     private int stationId;
     private string name;
-    private int x;
-    private int y;
+    private int height;
+    private int width;
     private int maxUnits;
     private int unitCount;
     private Unit[] units;
@@ -10,8 +10,8 @@ public Station(){
     public Station(int stationId, String name, int x, int y, int maxUnits){
         this.stationId = stationId;
         this.name = name;
-        this.x = x;
-        this.y = y;
+        this.height = x;
+        this.width = y;
         this.maxUnits = maxUnits;
         this.unitCount = 0;
         this.units = new Unit[capacity]
@@ -23,11 +23,11 @@ public Station(){
     public int getname(){
         return name
     }
-    public int getx(){
-        return x
+    public int getheight(){
+        return height
     }
-    public int gety(){
-        return y
+    public int getwidth(){
+        return width
     }
     public int getmaxUnits(){
         return maxUnits

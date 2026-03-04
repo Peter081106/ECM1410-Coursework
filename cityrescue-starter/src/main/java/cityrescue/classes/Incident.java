@@ -2,7 +2,7 @@ public Incident{
     private IncidentType type;
     private int incidentId
     private int severity;
-    private IncidnetStatus status;
+    private IncidentStatus status;
     private int unitAssignedId;
     private int x;
     private int y;
@@ -38,6 +38,9 @@ public Incident{
     }
     public void cancelledIncident(){
         this.status = IncidentStatus.CANCELLED;
+    }
+    public void dispatchedIncident(){
+        this.status = IncidentStatus.DISPATCHED;
     }
     public void releaseUnit(){
         this.unitAssignedId = null;

@@ -4,6 +4,7 @@ import cityrescue.enums.*;
 import classes.*;
 import cityrescue.exceptions.*;
 import java.util.ArrayList;
+import java.lang.Math;
 
 /**
  * CityRescueImpl (Starter)
@@ -47,7 +48,7 @@ public class CityRescueImpl implements CityRescue {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    @Override
+    @Override 
     public int[] getGridSize() {
         // TODO: implement
         int[] gridSize={grid.size(), grid.get(0).size()};
@@ -211,7 +212,7 @@ public class CityRescueImpl implements CityRescue {
         if (severity <= 1 || severity >=5){
             throw new InvalidSeverityException();
         }
-        //need to code if location is in bounds and not blocked
+        //need to code if location is in bounds and not blocked .getBlockedCells
 
         Incident incident = new incident(type, severity,  x,  y);
         incidents[nextIncindentId] = incident;
@@ -294,8 +295,26 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public void dispatch() {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not implemented yet");
+        int largestDistance = 0
+        ArrayList<Integer> shortestManhattan = new ArrayList<Integer>;
+        for(int i=0; i < incidentCount;i++){
+            if (incidents[i].getstatus.equals((DISPATCHED)){
+                manhattanDistance = (Math.abs(incidents[i].getheight()-incidents[i].getunitAssignedId().getCurrentLocation[0])) + (Math.abs(incidents[i].getwidth()-incidents[i].getunitAssignedId().getCurrentLocation[1]))
+                if (manhattanDistance > largestDistance){
+                    shortestManhattan.clear()
+                    shortestManhattan.add(i);
+                }
+                if (manhattanDistance == largestDistance){
+                    shortestManhattan.add(i);
+                }
+            }
+        if (shortestManhattan.length() == 1){
+            incidents[shortestManhattan[0]]
+        }
+
+        }
+
+        throw new ("Not implemented yet");
     }
 
     @Override
