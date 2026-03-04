@@ -19,9 +19,14 @@ public class CityRescueImpl implements CityRescue {
 
     int maxStations = 20;
     int maxUnits = 5;
+    int maxIncidents = 100;
     Station[] stations = new Station[maxStations];
     int nextStationId = 1;
     int stationCount = 0;
+    Incident[] incidents = new Incident[maxIncidents]
+    int nextIncindentId = 1;
+    int incidentCount = 0;
+
 
     @Override
     public void initialise(int width, int height) throws InvalidGridException {
@@ -92,7 +97,7 @@ public class CityRescueImpl implements CityRescue {
 
 
         Station station = new station(nextStationId,name,x,y,maxUnits);
-        stations[nextStationId-1] = station;
+        stations[nextStationId] = station;
 
         nextStationId++;
         stationCount++
@@ -112,7 +117,9 @@ public class CityRescueImpl implements CityRescue {
         if (index == -1){
             throw new IDNotRecognisedException();
         }
-        //not sure how to check if a station has any units in it
+        if (stations[index].getunitCount == 0){
+            return IllegalStateException();
+        }
         for(int i=index; i < stationCount-1;i++){
             stations[i] = stations[i+1];
         }
@@ -139,7 +146,10 @@ public class CityRescueImpl implements CityRescue {
         if (stations[index].getunitCount() > maxUnits){
             throw new InvalidCapacityException();
         }
-        
+
+        stations[index] = stations[index].setmaxUnits(maxUnits)
+        return "Capacity Updated.";
+
 
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -192,14 +202,46 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public int reportIncident(IncidentType type, int severity, int x, int y) throws InvalidSeverityException, InvalidLocationException {
-        // TODO: implement
+        if(type == null){
+            throw new Invalid();
+        }
+        if (severity <= 1 || severity >=5){
+            throw new InvalidSeverityException();
+        }
+        //need to code if location is in bounds and not blocked
+
+        Incident incident = new incident(type, severity,  x,  y);
+        incidents[nextIncindentId] = incident;
+
+        nextIncidentId++;
+        IncidentCount++
+
+        return nextStationId-1;
+        
+
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void cancelIncident(int incidentId) throws IDNotRecognisedException, IllegalStateException {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not implemented yet");
+        int index = -1;
+        for(int i=0; i < incidentCount;i++){
+            if(incidents[i].getincidentId() == incidentId){
+                index = i;
+                break;
+            }
+        if (index == -1){
+            throw new IDNotRecognisedException();
+        }
+        if (incidents[index].getStatus() != REPORTED ){
+            incidents[index].cancelledIncident();
+        }
+        if (incidents[index].getStatus() != DISPATCHED ){
+            //if dispatched release the unit
+            incidents[index].cancelledIncident();
+        }
+
+
     }
 
     @Override
@@ -210,7 +252,11 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public int[] getIncidentIds() {
-        // TODO: implement
+        int[] incidentIdsList = incidentSize;
+        for(int i=0; i < size(stations);i++){
+            stationIdsList[i] = stations[i].getStationId(); 
+        }
+        return stationIdsList;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
