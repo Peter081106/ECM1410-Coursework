@@ -71,7 +71,7 @@ class Ambulance extends Unit{
 
 class FireEngine extends Unit{
     private UnitType type=UnitType.FIRE_ENGINE
-    public Ambulance(int id, int home, int[] currentLocation){
+    public FireEngine(int id, int home, int[] currentLocation){
         super(id, home, currentLocation, workingIncident);
     }
 
@@ -92,7 +92,7 @@ class FireEngine extends Unit{
 
 class PoliceCar extends Unit{
     private UnitType type=UnitType.POLICE_CAR
-    public Ambulance(int id, int home, int[] currentLocation){
+    public PoliceCar(int id, int home, int[] currentLocation){
         super(id, home, currentLocation, workingIncident);
     }
 
