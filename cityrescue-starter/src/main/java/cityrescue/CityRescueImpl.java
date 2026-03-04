@@ -17,6 +17,12 @@ public class CityRescueImpl implements CityRescue {
     private ArrayList<ArrayList<GridStatus>> grid;
     private int current_tick=0;
 
+    int maxStations = 20;
+    int maxUnits = 5;
+    Station[] stations = new Station[maxStations];
+    int nextStationId = 1;
+    int stationCount = 0;
+
     @Override
     public void initialise(int width, int height) throws InvalidGridException {
         // TODO: implement
@@ -85,10 +91,11 @@ public class CityRescueImpl implements CityRescue {
         }
 
 
-        Station station = new station(nextStationId,name,x,y,5);
+        Station station = new station(nextStationId,name,x,y,maxUnits);
         stations[nextStationId-1] = station;
 
         nextStationId++;
+        stationCount++
 
         return nextStationId-1;
         throw new UnsupportedOperationException("Not implemented yet");
@@ -97,22 +104,43 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public void removeStation(int stationId) throws IDNotRecognisedException, IllegalStateException {
         int index = -1;
-        for(int i=0; i < size(stations);i++){
+        for(int i=0; i < stationCount;i++){
             if(stations[i].getStationId() == stationId){
                 index = i;
                 break;
             }
-            if (index == -1){
-                throw new IDNotRecognisedException();
-            }
-            
+        if (index == -1){
+            throw new IDNotRecognisedException();
         }
+        //not sure how to check if a station has any units in it
+        for(int i=index; i < stationCount-1;i++){
+            stations[i] = stations[i+1];
+        }
+        stations[size(stations)-1] = null;
+        stationCount--
+        
+
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void setStationCapacity(int stationId, int maxUnits) throws IDNotRecognisedException, InvalidCapacityException {
+        int index = -1;
+        for(int i=0; i < size(stations);i++){
+            if(stations[i].getStationId() == stationId){
+                index = i;
+                break;
+        if (index == -1){
+            throw new IDNotRecognisedException();
+        }
+        if (maxUnits < 0){
+            throw new InvalidCapacityException();
+        }
+        if (stations[index].getunitCount() > maxUnits){
+            throw new InvalidCapacityException();
+        }
         
+
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
