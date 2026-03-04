@@ -74,27 +74,55 @@ public class CityRescueImpl implements CityRescue {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    @Override
+        @Override
     public int addStation(String name, int x, int y) throws InvalidNameException, InvalidLocationException {
-        // TODO: implement
+
+        if (name == null || name.trim().isEmpty()){
+            throw new InvalidNameException();
+        }
+        if ((x > getGridSize()[0]) || (y > getGridSize()[1])){
+            throw new InvalidLocationException();
+        }
+
+
+        Station station = new station(nextStationId,name,x,y,5);
+        stations[nextStationId-1] = station;
+
+        nextStationId++;
+
+        return nextStationId-1;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void removeStation(int stationId) throws IDNotRecognisedException, IllegalStateException {
-        // TODO: implement
+        int index = -1;
+        for(int i=0; i < size(stations);i++){
+            if(stations[i].getStationId() == stationId){
+                index = i;
+                break;
+            }
+            if (index == -1){
+                throw new IDNotRecognisedException();
+            }
+            
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void setStationCapacity(int stationId, int maxUnits) throws IDNotRecognisedException, InvalidCapacityException {
-        // TODO: implement
+        
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public int[] getStationIds() {
-        // TODO: implement
+        int[] stationIdsList = size(stations);
+        for(int i=0; i < size(stations);i++){
+            stationIdsList[i] = stations[i].getStationId(); 
+        }
+        return stationIdsList;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
