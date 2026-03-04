@@ -1,7 +1,10 @@
+package cityrescue.classes;
+
 import cityrescue.enums.*;
 
 abstract class Unit{
     private int id;
+    private UnitType type;
     private UnitStatus status=UnitStatus.IDLE;
     private int home;
     private int[] currentLocation;
@@ -34,10 +37,10 @@ abstract class Unit{
     public void setHome(int home){
         this.home=home;
     }
-    public int[] getLocation(){
+    public int[] getCurrentLocation(){
         return currentLocation;
     }
-    public void setLocation(int[] currentLocation){
+    public void setCurrentLocation(int[] currentLocation){
         this.currentLocation=currentLocation;
     }
     public int getWorkingIncident(){
@@ -46,67 +49,84 @@ abstract class Unit{
     public void setWorkingIncident(int workingIncident){
         this.workingIncident=workingIncident;
     }
-}
 
 class Ambulance extends Unit{
     private UnitType type=UnitType.AMBULANCE;
+    private int taskTick=2;
+    private int ticksCompleted=0;
     public Ambulance(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation, workingIncident);
+        super(id, home, currentLocation, workingIncident, OUT_OF_SERVICE);
     }
 
     public int getTicksToComplete(){
-        return 2;
+        int remainingTicks=taskTick-ticksCompleted;
+        if (remainingTicks==0){
+            ticksCompleted=0;
+        }
+        return remainingTicks;
     }
 
     public boolean canHandle(IncidentType incident){
         boolean handle;
         if (incident.equals(IncidentType.MEDICAL)){
-            handle=true
+            handle=true;
         } else{
-            handle=false
+            handle=false;
         }
-        return handle
+        return handle;
     }
 }
 
 class FireEngine extends Unit{
-    private UnitType type=UnitType.FIRE_ENGINE
+    private UnitType type=UnitType.FIRE_ENGINE;
+    private taskTick=4;
+    private ticksCompleted=0;
     public FireEngine(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation, workingIncident);
+        super(id, home, currentLocation, workingIncident, OUT_OF_SERVICE);
     }
 
     public int getTicksToComplete(){
-        return 4;
+        int remainingTicks=taskTick-ticksCompleted;
+        if (remainingTicks==0){
+            ticksCompleted=0;
+        }
+        return remainingTicks;
     }
 
     public boolean canHandle(IncidentType incident){
         boolean handle;
         if (incident.equals(IncidentType.FIRE)){
-            handle=true
+            handle=true;
         } else{
-            handle=false
+            handle=false;
         }
-        return handle
+        return handle;
     }
 }
 
 class PoliceCar extends Unit{
-    private UnitType type=UnitType.POLICE_CAR
+    private UnitType type=UnitType.POLICE_CAR;
+    private taskTick=3;
+    private ticksCompleted=0;
     public PoliceCar(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation, workingIncident);
+        super(id, home, currentLocation, workingIncident, OUT_OF_SERVICE);
     }
 
     public int getTicksToComplete(){
-        return 3;
+        int remainingTicks=taskTick-ticksCompleted;
+        if (remainingTicks==0){
+            ticksCompleted=0;
+        }
+        return remainingTicks;
     }
 
     public boolean canHandle(IncidentType incident){
         boolean handle;
         if (incident.equals(IncidentType.CRIME)){
-            handle=true
+            handle=true;
         } else{
-            handle=false
+            handle=false;
         }
-        return handle
+        return handle;
     }
 }

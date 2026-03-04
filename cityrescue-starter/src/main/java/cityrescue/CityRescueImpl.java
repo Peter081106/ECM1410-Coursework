@@ -16,7 +16,8 @@ public class CityRescueImpl implements CityRescue {
     // TODO: add fields (map, arrays for stations/units/incidents, counters, tick, etc.)
     private ArrayList<ArrayList<GridStatus>> grid;
     private int current_tick=0;
-    private ArrayList<Unit> units;
+    final int MAX_UNITS=50
+    private Unit[] units=[MAX_UNITS];
     private int currentUnitID=0;
 
     @Override
@@ -55,6 +56,7 @@ public class CityRescueImpl implements CityRescue {
         }else{
             if (grid.get(x).get(y).equals(GridStatus.OPEN)){
                 grid.get(x).set(y, GridStatus.ROADBLOCK);
+                CityMap.refresh();
             } else{
                 System.out.println("Location currently in use with a: "+grid.get(x).get(y));
             }
@@ -70,6 +72,7 @@ public class CityRescueImpl implements CityRescue {
         }else{
             if (grid.get(x).get(y).equals(GridStatus.ROADBLOCK)){
                 grid.get(x).set(y, GridStatus.OPEN);
+                CityMap.refresh()
             } else{
                 System.out.println("No roadblock in selected location");
             }
@@ -106,7 +109,7 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         boolean idCheck=false;
         Station foundStation;
-        for (i=0, i<stations.length(), i++){
+        for (int i=0; i<stations.length(); i++){
             if stations[i].getstationId().equals(stationId){
                 idCheck=true;
                 foundStation=stations[i];
@@ -116,23 +119,36 @@ public class CityRescueImpl implements CityRescue {
         if (idCheck==false){
             throw new IDNotRecognisedException("Station ID not recognised");
         } else{
-            if (foundStation.getmaxUnits.equals(foundStation.getUnitCount())){
+            if (foundStation.getmaxUnits().equals(foundStation.getUnitCount())){
                 throw new IllegalStateException("Max units in station already reached");
             } else{
-                if type.equals(null){
-                    throw new InvalidUnitException("Invalid Unit type used");
-                } else{
-                    switch type{
-                        case UnitType.AMBULANCE:
-                            newUnit=new Ambulance(currentUnitID, foundStation.getstationId(), stationLoc);
-                        case UnitType.POLICE_CAR:
-                            newUnit=new PoliceCar(currentUnitID, foundStation.getstationId(), stationLoc);
-                        case UnitType.FIRE_ENGINE:
-                            newUnit=new FireEngine(currentUnitID, foundStation.getstationId(), stationLoc)
+                int nullLoc=-1;
+                boolean endwhile=false;
+                int index=0;
+                while (endwhile==false && index<units.length()){
+                    if (units[index].equals(null)){
+                        nullLoc=index;
+                        endwhile=true;
                     }
-                    currentUnitID+=1;
-                    units.add(newUnit);
-                    foundStation.addUnit(newUnit);
+                }
+                if (nullLoc==-1){
+                    throw new InvalidUnitException("Max units already reached")
+                }else{
+                    if type.equals(null){
+                        throw new InvalidUnitException("Invalid Unit type used");
+                    } else{
+                        switch type{
+                            case UnitType.AMBULANCE:
+                                newUnit=new Ambulance(currentUnitID, foundStation.getstationId(), stationLoc);
+                            case UnitType.POLICE_CAR:
+                                newUnit=new PoliceCar(currentUnitID, foundStation.getstationId(), stationLoc);
+                            case UnitType.FIRE_ENGINE:
+                                newUnit=new FireEngine(currentUnitID, foundStation.getstationId(), stationLoc)
+                        }
+                        currentUnitID+=1;
+                        units[nullLoc]=newUnit
+                        foundStation.addUnit(newUnit);
+                    }
                 }
             }
         }
@@ -144,10 +160,11 @@ public class CityRescueImpl implements CityRescue {
     public void decommissionUnit(int unitId) throws IDNotRecognisedException, IllegalStateException {
         // TODO: implement
         boolean checkID=false;
-        for (i=0, i<units.size(), i++){
-            if (units.get(i).getUnitID().equals(unitID)){
+        Unit foundUnit;
+        for (int i=0; i<units.length(); i++){
+            if (units[i].getUnitID().equals(unitID)){
                 checkID=true;
-                foundUnit=units.get(i);
+                foundUnit=units[i];
                 int arrayLoc=i
             }
         }
@@ -158,7 +175,16 @@ public class CityRescueImpl implements CityRescue {
                 throw new IllegalStateException("Unit must free to decomission");
             }
         } else{
-            units.remove(arrayLoc);
+            int homeStation=foundUnit.getHome();
+            Station foundStation;
+            for (int x=0; x<stations.length(); i++){
+                if stations[x].getstationId().equals(stationId){
+                    foundStation=stations[x];
+                }
+            }
+            foundStation.removeUnit(foundUnit.getUnitID());
+            units[arrayLoc]=null;
+
         }
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -166,24 +192,91 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public void transferUnit(int unitId, int newStationId) throws IDNotRecognisedException, IllegalStateException {
         // TODO: implement
+        boolean checkStationID=false;
+        boolean checkUnitID=false;
+        Station foundStation;
+        Unit foundUnit;
+        for (int i=0; i<stations.length(); i++){
+            if stations[i].getstationId().equals(newStationId){
+                checkStationID=true;
+                foundStation=stations[i];
+                int[] stationLoc={foundStation.getx(), foundStation.gety()}
+            }
+        }
+        for (int x=0; x<units.length(); i++){
+            if (units[i].getUnitID().equals(unitID)){
+                checkUnitID=true;
+                foundUnit=units.get(i);
+        }
+        if (checkStationID==false || checkunitID==false){
+            throw new IDNotRecognisedException("Station ID or Unit ID not found");
+        } else{
+            if (foundStation.getUnitCount().equals(foundStation.getmaxUnits())){
+                throw new IllegalStateException("Max station units already reached");
+            } else{
+                if (!(foundUnit.getStatus().equals(UnitStatus.IDLE))){
+                    throw new IllegalStateException("Unit must be idle to transfer station");
+                } else{
+                    foundUnit.setHome(foundStation.getstationId());
+                    foundUnit.setLocation(stationLoc);
+                }
+            }
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void setUnitOutOfService(int unitId, boolean outOfService) throws IDNotRecognisedException, IllegalStateException {
         // TODO: implement
+        Unit foundUnit;
+        boolean checkUnitID=false;
+        for (int x=0; x<units.length(); i++){
+            if (units[i].getUnitID().equals(unitID)){
+                checkUnitID=true;
+                foundUnit=units[i];
+        if (checkUnitID==false){
+            throw new IDNotRecognisedException("Unit ID not found");
+        } else{
+            if (!(foundUnit.getStatus().equals(UnitStatus.IDLE) || foundUnit.getStatus().equals(UnitStatus.OUT_OF_SERVICE))){
+                throw new IllegalStateException("Unit must be idle or out of service");
+            }else{
+                if outOfService==false{
+                    foundUnit.setStatus(UnitStatus.OUT_OF_SERVICE);
+                } else{
+                    foundUnit.setStatus(UnitStatus.IDLE);
+                }
+            }
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public int[] getUnitIds() {
         // TODO: implement
+        int[] unitIDs=int[units.length()];
+        for (int i=0; i<units.length(); i++){
+            unitIDs[i]=units[i].getUnitId();
+        }
+        return unitIDs;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public String viewUnit(int unitId) throws IDNotRecognisedException {
         // TODO: implement
+        String unitString;
+        Unit foundUnit;
+        boolean checkUnitID=false;
+        for (int x=0; x<units.length(); i++){
+            if (units[i].getUnitID().equals(unitID)){
+                checkUnitID=true;
+                foundUnit=units[i];
+        if (checkUnitID==false){
+            throw new IDNotRecognisedException("Unit ID not found");
+        } else{
+            unitString="TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+foundUnit.getCurrentLocation()+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident()+" WORK="+foundUnit.getTicksToComplete;
+        }
+        return unitString;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

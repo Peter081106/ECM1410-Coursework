@@ -1,4 +1,4 @@
-package classes;
+package cityrescue.classes;
 
 import cityrescue.enums.GridStatus;
 import java.util.ArrayList;
@@ -7,11 +7,12 @@ import java.util.List;
 class CityMap{
     private ArrayList<ArrayList<GridStatus>> grid;
     private ArrayList<ArrayList<Integer>> obstacleLocations=new ArrayList<>();
-    private boolean legalMove=false;
     public CityMap(ArrayList<ArrayList<GridStatus>> grid){
         this.grid=grid;
-        for (int x=0; x<grid.get(0).size(); x++){
-            for(int y=0; y<grid.get(1).size(); y++){
+    }
+    public ArrayList<ArrayList<Integer>> getBlockedCells(){
+        for (int x=0; x<grid.size(); x++){
+            for(int y=0; y<grid.get(0).size(); y++){
                 if (!(grid.get(x).get(y).equals(GridStatus.OPEN))){
                     ArrayList<Integer> location=new ArrayList<>();
                     location.add(x);
@@ -20,11 +21,15 @@ class CityMap{
                 }
             }
         }
-    }
-    public ArrayList<ArrayList<Integer>> getBlockedCells(){
         return obstacleLocations;
     }
+
+    public refresh(ArrayList<ArrayList<GridStatus>> grid){
+        this.grid=grid
+    }
+
     public boolean isMoveLegal(ArrayList<Integer> moveLocation){
+        boolean legalMove=false;
         if (grid.get(moveLocation.get(0)).get(moveLocation.get(1))==GridStatus.OPEN){
             legalMove=true;
         }

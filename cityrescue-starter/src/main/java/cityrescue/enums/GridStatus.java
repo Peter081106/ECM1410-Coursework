@@ -1,2 +1,2 @@
 package cityrescue.enums;
-public enum GridStatus{OPEN, ROADBLOCK, VEHICLE, STATION}
+public enum GridStatus{OPEN, ROADBLOCK, STATION}
