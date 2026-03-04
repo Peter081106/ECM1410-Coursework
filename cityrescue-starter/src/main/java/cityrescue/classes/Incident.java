@@ -3,6 +3,7 @@ public Incident{
     private int incidentId
     private int severity;
     private IncidnetStatus status;
+    private int unitAssignedId;
     private int x;
     private int y;
 
@@ -24,6 +25,9 @@ public Incident{
     public int gety(){
         return y;
     }
+    public int unitAssignedId(){
+        return unitAssignedId
+    }
 
     public Incident(IncidentType type, int severity, int x, int y){
         this.type = type;
@@ -34,5 +38,11 @@ public Incident{
     }
     public cancelledIncident(){
         this.status = IncidentStatus.CANCELLED;
+    }
+    public releaseUnit(){
+        this.unitAssignedId = null;
+    }
+    public escalateSeverity(newSeverity){
+        this.severity = newSeverity;
     }
 }
