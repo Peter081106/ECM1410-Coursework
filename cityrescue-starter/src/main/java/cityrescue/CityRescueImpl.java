@@ -237,14 +237,15 @@ public class CityRescueImpl implements CityRescue {
         if (index == -1){
             throw new IDNotRecognisedException();
         }
-        if (incidents[index].getStatus() != REPORTED ){
+        if (!(incidents[index].getStatus().equals(REPORTED))){
             incidents[index].cancelledIncident();
-            return
         }
-        if (incidents[index].getStatus() != DISPATCHED ){
+        if (!(incidents[index].getStatus().equals(DISPATCHED))){
             incidents[index].releaseUnit();
             incidents[index].cancelledIncident();
-            return
+        }
+        else{
+            throw IllegalStateException();
         }
 
 
@@ -258,6 +259,7 @@ public class CityRescueImpl implements CityRescue {
                 index = i;
                 break;
             }
+        }
         if (index == -1){
             throw new IDNotRecognisedException();
         }
@@ -268,10 +270,11 @@ public class CityRescueImpl implements CityRescue {
             throw new IllegalStateException();
         }
         incidents[index].escalateSeverity(newSeverity);
+        return "Severity updated";
 
 
         throw new UnsupportedOperationException("Not implemented yet");
-    }
+     }
 
     @Override
     public int[] getIncidentIds(){
@@ -281,7 +284,6 @@ public class CityRescueImpl implements CityRescue {
         }
         return stationIdsList;
         throw new UnsupportedOperationException("Not implemented yet");
-        getIncident
     }
 
     @Override

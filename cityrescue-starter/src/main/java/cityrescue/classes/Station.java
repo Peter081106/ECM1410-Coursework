@@ -44,4 +44,21 @@ public Station(){
         this.units = newUnits;
         this.unit = newmaxUnits;
     }
+    public void addUnit(Unit unit){
+        for (int i = 0; i < maxUnits; i++) {
+            if (units[i] == null){
+                units[i] = unit;
+            }
+        }
+    }
+    public void removeUnit(int unitId){
+        for (int i = 0; i < maxUnits; i++) {
+            if (units[i] == unitId){
+                units[i] = null;
+            }
+        }
+
+    }
+        
+
 }

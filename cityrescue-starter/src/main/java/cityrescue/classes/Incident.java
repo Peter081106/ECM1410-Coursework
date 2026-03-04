@@ -36,13 +36,13 @@ public Incident{
         this.x = x;
         this.y = y;
     }
-    public cancelledIncident(){
+    public void cancelledIncident(){
         this.status = IncidentStatus.CANCELLED;
     }
-    public releaseUnit(){
+    public void releaseUnit(){
         this.unitAssignedId = null;
     }
-    public escalateSeverity(newSeverity){
+    public void escalateSeverity(newSeverity){
         this.severity = newSeverity;
     }
 }
