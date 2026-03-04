@@ -464,17 +464,22 @@ public class CityRescueImpl implements CityRescue {
                 if (manhattanDistance == largestDistance){
                     shortestManhattan.add(i);
                 }
-        
-
-                
-
             }
         }
-            
+
+        if shortestManhattan.length() == 1{
+            lowestId = shortestManhattan[0]
         }
 
-
-    
+        if shortestManhattan.length() > 1{
+            int lowestId = shortestManhattan[0];
+            for(int i=0; i < shortestManhattan.length();i++){
+                if (shortestManhattan[i] < lowestId){
+                    lowestId = shortestManhattan[i];
+                }
+            }
+        
+        }
 
         throw new ("Not implemented yet");
     }
