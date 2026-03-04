@@ -435,14 +435,25 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public String viewIncident(int incidentId) throws IDNotRecognisedException {
-        // TODO: implement
+        int index = -1;
+        for(int i=0; i < incidentCount;i++){
+            if(incidents[i].getincidentId() == incidentId){
+                index = i;
+                break;
+            }
+        }
+        if (index == -1){
+            throw new IDNotRecognisedException();
+        return "I#"+str(incidentId)+" TYPE="+str(incidents[index].gettype())+" SEV="+str(incidents[index].getseverity())+" LOC=("+str(incidents[index].getwidth())+","+str(incidents[index].getheight())+") STATUS="+str(incidents[index].getstatus())+" UNIT="+str(incidents[index].getunitAssignedId())
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void dispatch() {
+        // creates a list of the indexes of the ids
         int largestDistance = 0
         ArrayList<Integer> shortestManhattan = new ArrayList<Integer>;
+        ArrayList<Integer> sameIds = new ArrayList<Integer>;
         for(int i=0; i < incidentCount;i++){
             if (incidents[i].getstatus.equals((DISPATCHED)){
                 manhattanDistance = (Math.abs(incidents[i].getheight()-incidents[i].getunitAssignedId().getCurrentLocation[0])) + (Math.abs(incidents[i].getwidth()-incidents[i].getunitAssignedId().getCurrentLocation[1]))
@@ -453,12 +464,17 @@ public class CityRescueImpl implements CityRescue {
                 if (manhattanDistance == largestDistance){
                     shortestManhattan.add(i);
                 }
+        
+
+                
+
             }
-        if (shortestManhattan.length() == 1){
-            incidents[shortestManhattan[0]]
+        }
+            
         }
 
-        }
+
+    
 
         throw new ("Not implemented yet");
     }
@@ -471,7 +487,22 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public String getStatus() {
-        // TODO: implement
+        
+        String finalGetStatusString = "TICK="+str(current_tick)+" \n
+        STATIONS="+str(stationCount)+" UNITS="+unitIDs.length()+" INCIDENTS="+str(incidentCount)+" OBSTACLES="+str(getBlockedCells().size())+" \n
+        INCIDENTS \n"
+        for(int i=0; i < incidentCount;i++){
+            finalGetStatusString = finalGetStatusString + viewIncident(incidents[i])+"\n"
+        }
+        finalGetStatusString = finalGetStatusString + "UNITS \n"
+        for(int i=0; i < unitIds.length();i++){
+            finalGetStatusString = finalGetStatusString + viewIncident(unitIds[i])+"\n"
+        }
+
+        
+        
+
+        
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }
