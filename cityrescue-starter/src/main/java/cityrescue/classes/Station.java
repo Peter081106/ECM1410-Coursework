@@ -1,11 +1,16 @@
-public Station(){
+package cityrescue.classes;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Station{
     private int stationId;
-    private string name;
+    private String name;
     private int height;
     private int width;
     private int maxUnits;
     private int unitCount;
-    private List<Unit> units;
+    private ArrayList<Unit> units;
 
     public Station(int stationId, String name, int x, int y, int maxUnits){
         this.stationId = stationId;
@@ -20,7 +25,7 @@ public Station(){
     public int getstationId(){
         return stationId;
     }
-    public int getname(){
+    public String getname(){
         return name;
     }
     public int getheight(){
@@ -35,20 +40,17 @@ public Station(){
     public int getunitCount(){
         return unitCount;
     }
-    public void setmaxUnits(newmaxUnits){
-        maxUnits=newMaxUnits;
+    public void setmaxUnits(int newmaxUnits){
+        maxUnits=newmaxUnits;
     }
     public void addUnit(Unit unit){
         units.add(unit);
     }
     public void removeUnit(int unitId){
         for (int i = 0; i < units.size(); i++) {
-            if (units.get(i).getUnitID() == unitId){
+            if (units.get(i).getUnitId() == unitId){
                 units.remove(i);
             }
         }
-
     }
-        
-
 }

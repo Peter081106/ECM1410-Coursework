@@ -1,11 +1,27 @@
 package cityrescue;
 
-import cityrescue.enums.*;
-import classes.*;
-import cityrescue.exceptions.*;
 import java.util.ArrayList;
-import java.lang.Math;
 import java.util.List;
+
+import cityrescue.classes.Ambulance;
+import cityrescue.classes.CityMap;
+import cityrescue.classes.FireEngine;
+import cityrescue.classes.Incident;
+import cityrescue.classes.PoliceCar;
+import cityrescue.classes.Station;
+import cityrescue.classes.Unit;
+import cityrescue.enums.GridStatus;
+import cityrescue.enums.IncidentStatus;
+import cityrescue.enums.IncidentType;
+import cityrescue.enums.UnitStatus;
+import cityrescue.enums.UnitType;
+import cityrescue.exceptions.IDNotRecognisedException;
+import cityrescue.exceptions.InvalidCapacityException;
+import cityrescue.exceptions.InvalidGridException;
+import cityrescue.exceptions.InvalidLocationException;
+import cityrescue.exceptions.InvalidNameException;
+import cityrescue.exceptions.InvalidSeverityException;
+import cityrescue.exceptions.InvalidUnitException;
 
 /**
  * CityRescueImpl (Starter)
@@ -16,11 +32,10 @@ import java.util.List;
 public class CityRescueImpl implements CityRescue {
 
     // TODO: add fields (map, arrays for stations/units/incidents, counters, tick, etc.)
-    private ArrayList<ArrayList<GridStatus>> grid;
     private int current_tick=0;
     private final int MAX_UNITS=50;
     private List<Unit> units=new ArrayList<>();
-    private int currentUnitID=0;
+    private int currentUnitID=1;
 
     private int maxStations = 20;
     private int maxUnits = 5;
@@ -31,6 +46,8 @@ public class CityRescueImpl implements CityRescue {
     private List<Incident> incidents = new ArrayList<>();
     private int nextIncindentId = 1;
     private int incidentCount = 0;
+    private ArrayList<ArrayList<GridStatus>> grid= new ArrayList<>();
+    private CityMap map;
 
 
     @Override
@@ -39,16 +56,15 @@ public class CityRescueImpl implements CityRescue {
         if (width<0 || height<0){
             throw new InvalidGridException("Invalid values for grid initialisation used");
         }else{
-            ArrayList<ArrayList<GridStatus>> tempGrid;
-                for (int x=0;x<height;x++){
-                    ArrayList<GridStatus> row=new ArrayList<>();
-                    for (int y=0;y<width;y++){
-                        row.add(GridStatus.OPEN);
-                    }
-                    tempGrid.add(row);
+            grid=new ArrayList<>();
+            for (int i=0; i<height; i++) {
+                ArrayList<GridStatus> row=new ArrayList<>();
+                for (int x=0; x<width; x++) {
+                    row.add(GridStatus.OPEN);
                 }
-            grid=tempGrid;
-            CityMap map=new CityMap(tempGrid);  
+                grid.add(row);
+            }
+            map=new CityMap(height, width);  
             current_tick=0;
             stations=new ArrayList<>();
             units=new ArrayList<>();
@@ -71,7 +87,7 @@ public class CityRescueImpl implements CityRescue {
         }else{
             if (grid.get(x).get(y).equals(GridStatus.OPEN)){
                 grid.get(x).set(y, GridStatus.ROADBLOCK);
-                CityMap.refresh();
+                map.refresh(grid);
             } else{
                 System.out.println("Location currently in use with a: "+grid.get(x).get(y));
             }
@@ -86,7 +102,7 @@ public class CityRescueImpl implements CityRescue {
         }else{
             if (grid.get(x).get(y).equals(GridStatus.ROADBLOCK)){
                 grid.get(x).set(y, GridStatus.OPEN);
-                CityMap.refresh()
+                map.refresh(grid);
             } else{
                 System.out.println("No roadblock in selected location");
             }
@@ -97,14 +113,14 @@ public class CityRescueImpl implements CityRescue {
     public int addStation(String name, int x, int y) throws InvalidNameException, InvalidLocationException {
 
         if (name == null || name.trim().isEmpty()){
-            throw new InvalidNameException();
+            throw new InvalidNameException("Invalid name used for station");
         }
         if ((x > getGridSize()[0]) || (y > getGridSize()[1])){
             throw new InvalidLocationException("Value(s) for location not in range");
         }
 
 
-        Station station = new station(nextStationId,name,x,y,maxUnits);
+        Station station = new Station(nextStationId,name,x,y,maxUnits);
         stations.add(station);
 
         nextStationId++;
@@ -117,7 +133,7 @@ public class CityRescueImpl implements CityRescue {
     public void removeStation(int stationId) throws IDNotRecognisedException, IllegalStateException {
         int index = -1;
         for(int i=0; i < stationCount;i++){
-            if(stations.get(i).getStationId() == stationId){
+            if(stations.get(i).getstationId() == stationId){
                 index = i;
                 break;
             }
@@ -138,7 +154,7 @@ public class CityRescueImpl implements CityRescue {
     public void setStationCapacity(int stationId, int maxUnits) throws IDNotRecognisedException, InvalidCapacityException {
         int index = -1;
         for(int i=0; i < stations.size();i++){
-            if(stations.get(i).getStationId() == stationId){
+            if(stations.get(i).getstationId() == stationId){
                 index = i;
                 break;
             }
@@ -149,10 +165,10 @@ public class CityRescueImpl implements CityRescue {
             if (maxUnits <= 0){
                 throw new InvalidCapacityException("Max units cannot be 0 or less");
             }else{
-                if (stations.get(i).getunitCount() >= maxUnits){
-                    throw new InvalidCapacityException("Max capacity must be equal to or larger than current units of"+stations.get(i).getunitCount);
+                if (stations.get(index).getunitCount() >= maxUnits){
+                    throw new InvalidCapacityException("Max capacity must be equal to or larger than current units of"+stations.get(index).getunitCount());
                 } else{
-                    stations.get(i).setMaxUnits(maxUnits);
+                    stations.get(index).setmaxUnits(maxUnits);
                 }
             }
         }
@@ -162,7 +178,7 @@ public class CityRescueImpl implements CityRescue {
     public int[] getStationIds() {
         int[] stationIdsList = new int[stations.size()];
         for(int i=0; i < stations.size();i++){
-            stationIdsList[i] = stations.get(i).getStationId(); 
+            stationIdsList[i] = stations.get(i).getstationId(); 
         }
         return stationIdsList;
     }
@@ -171,37 +187,45 @@ public class CityRescueImpl implements CityRescue {
     public int addUnit(int stationId, UnitType type) throws IDNotRecognisedException, InvalidUnitException, IllegalStateException{
         // TODO: implement
         boolean idCheck=false;
-        Station foundStation;
+        int index=-1;
+        int[] stationLoc=new int[2];
         for (int i=0; i<stations.size(); i++){
-            if stations.get(i).getstationId().equals(stationId){
+            if (stations.get(i).getstationId()==stationId){
                 idCheck=true;
-                foundStation=stations.get(i);
-                int[] stationLoc={foundStation.getx(), foundStation.gety()}
+                index=i;
+                stationLoc[0]=stations.get(index).getheight();
+                stationLoc[1]=stations.get(index).getwidth();
             }
         }
         if (idCheck==false){
             throw new IDNotRecognisedException("Station ID not recognised");
         } else{
-            if (foundStation.getmaxUnits().equals(foundStation.getUnitCount())){
+            if (stations.get(index).getmaxUnits()==stations.get(index).getunitCount()){
                 throw new IllegalStateException("Max units in station already reached");
             } else{
                 if (units.size()==MAX_UNITS){
-                    throw new InvalidUnitException("Max units already reached")
+                    throw new InvalidUnitException("Max units already reached");
                 }else{
-                    if type.equals(null){
+                    if (!(type instanceof UnitType)){
                         throw new InvalidUnitException("Invalid Unit type used");
                     } else{
-                        switch type{
-                            case UnitType.AMBULANCE:
-                                newUnit=new Ambulance(currentUnitID, foundStation.getstationId(), stationLoc);
-                            case UnitType.POLICE_CAR:
-                                newUnit=new PoliceCar(currentUnitID, foundStation.getstationId(), stationLoc);
-                            case UnitType.FIRE_ENGINE:
-                                newUnit=new FireEngine(currentUnitID, foundStation.getstationId(), stationLoc)
+                        Unit newUnit;
+                        switch (type){
+                            case AMBULANCE:
+                                newUnit=new Ambulance(currentUnitID, stations.get(index).getstationId(), stationLoc);
+                                break;
+                            case POLICE_CAR:
+                                newUnit=new PoliceCar(currentUnitID, stations.get(index).getstationId(), stationLoc);
+                                break;
+                            case FIRE_ENGINE:
+                                newUnit=new FireEngine(currentUnitID, stations.get(index).getstationId(), stationLoc);
+                                break;
+                            default:
+                                throw new InvalidUnitException("Invalid Unit type");
                         }
+                        units.add(newUnit);
+                        stations.get(index).addUnit(newUnit);
                         currentUnitID+=1;
-                        units.add(newUnit)
-                        foundStation.addUnit(newUnit);
                     }
                 }
             }
@@ -213,31 +237,29 @@ public class CityRescueImpl implements CityRescue {
     public void decommissionUnit(int unitId) throws IDNotRecognisedException, IllegalStateException {
         // TODO: implement
         boolean checkID=false;
-        Unit foundUnit;
+        int index=-1;
         for (int i=0; i<units.size(); i++){
-            if (units.get(i).getUnitID().equals(unitID)){
+            if (units.get(i).getUnitId()==unitId){
                 checkID=true;
-                foundUnit=units.get(i);
-                int arrayLoc=i
+                index=i;
             }
         }
         if (checkID==false){
             throw new IDNotRecognisedException("Unit not found");
         } else{
-            if (!(foundUnit.getStatus().equals(UnitStatus.IDLE) || foundUnit.getStatus().equals(UnitStatus.OUT_OF_SERVICE))){
+            if (!(units.get(index).getStatus().equals(UnitStatus.IDLE) || units.get(index).getStatus().equals(UnitStatus.OUT_OF_SERVICE))){
                 throw new IllegalStateException("Unit must free to decomission");
-            }
-        } else{
-            int homeStation=foundUnit.getHome();
-            Station foundStation;
+            } else{
+            int homeStation=units.get(index).getHome();
+            int stationIndex=-1;
             for (int x=0; x<stations.size(); x++){
-                if stations.get(x).getstationId().equals(stationId){
-                    foundStation=stations.get(x);
+                if (stations.get(x).getstationId()==homeStation){
+                    stationIndex=x;
                 }
             }
-            foundStation.removeUnit(foundUnit.getUnitID());
-            units.remove(arrayLoc)
-
+            stations.get(stationIndex).removeUnit(units.get(index).getUnitId());
+            units.remove(index);
+            }
         }
     }
 
@@ -246,55 +268,60 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         boolean checkStationID=false;
         boolean checkUnitID=false;
-        Station foundStation;
-        Unit foundUnit;
+        int stationIndex=-1;
+        int unitIndex=-1;
+        int[] stationLoc=new int[2];
         for (int i=0; i<stations.size(); i++){
-            if stations.get(i).getstationId().equals(newStationId){
+            if (stations.get(i).getstationId()==newStationId){
                 checkStationID=true;
-                foundStation=stations.get(i);
-                int[] stationLoc={foundStation.getheight(), foundStation.getwidth()}
+                stationIndex=i;
+                stationLoc=new int[]{stations.get(stationIndex).getheight(), stations.get(stationIndex).getwidth()};
             }
         }
-        for (int x=0; x<units.size(); i++){
-            if (units.get(i).getUnitID().equals(unitID)){
+        for (int x=0; x<units.size(); x++){
+            if (units.get(x).getUnitId()==unitId){
                 checkUnitID=true;
-                foundUnit=units.get(i);
+                unitIndex=x;
+            }
         }
-        if (checkStationID==false || checkunitID==false){
+        if (checkStationID==false || checkUnitID==false){
             throw new IDNotRecognisedException("Station ID or Unit ID not found");
         } else{
-            if (foundStation.getUnitCount().equals(foundStation.getmaxUnits())){
+            if (stations.get(stationIndex).getunitCount()==stations.get(stationIndex).getmaxUnits()){
                 throw new IllegalStateException("Max station units already reached");
             } else{
-                if (!(foundUnit.getStatus().equals(UnitStatus.IDLE))){
+                if (!(units.get(unitIndex).getStatus().equals(UnitStatus.IDLE))){
                     throw new IllegalStateException("Unit must be idle to transfer station");
                 } else{
-                    foundUnit.setHome(foundStation.getstationId());
-                    foundUnit.setLocation(stationLoc);
+                    units.get(unitIndex).setHome(stations.get(stationIndex).getstationId());
+                    units.get(unitIndex).setCurrentLocation(stationLoc);
                 }
             }
         }
     }
 
+
     @Override
     public void setUnitOutOfService(int unitId, boolean outOfService) throws IDNotRecognisedException, IllegalStateException {
         // TODO: implement
-        Unit foundUnit;
+        int unitIndex=-1;
         boolean checkUnitID=false;
-        for (int x=0; x<units.size(); i++){
-            if (units.get(i).getUnitID().equals(unitID)){
+        for (int x=0; x<units.size(); x++){
+            if (units.get(x).getUnitId()==unitId){
                 checkUnitID=true;
-                foundUnit=units.get(i);
+                unitIndex=x;
+            }
+        }
         if (checkUnitID==false){
             throw new IDNotRecognisedException("Unit ID not found");
         } else{
-            if (!(foundUnit.getStatus().equals(UnitStatus.IDLE) || foundUnit.getStatus().equals(UnitStatus.OUT_OF_SERVICE))){
+            if (!(units.get(unitIndex).getStatus().equals(UnitStatus.IDLE) || units.get(unitIndex).getStatus().equals(UnitStatus.OUT_OF_SERVICE))){
                 throw new IllegalStateException("Unit must be idle or out of service");
             }else{
-                if outOfService==false{
-                    foundUnit.setStatus(UnitStatus.OUT_OF_SERVICE);
+                if (outOfService==false){
+                    units.get(unitIndex).setStatus(UnitStatus.OUT_OF_SERVICE);
                 } else{
-                    foundUnit.setStatus(UnitStatus.IDLE);
+                    units.get(unitIndex).setStatus(UnitStatus.IDLE);
                 }
             }
         }
@@ -313,34 +340,36 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public String viewUnit(int unitId) throws IDNotRecognisedException {
         // TODO: implement
-        String unitString;
-        Unit foundUnit;
+        String outputString="";
+        int unitIndex=-1;
         boolean checkUnitID=false;
         for (int x=0; x<units.size(); x++){
-            if (units.get(x).getUnitID().equals(unitID)){
+            if (units.get(x).getUnitId()==unitId){
                 checkUnitID=true;
-                foundUnit=units.get(i);
+                unitIndex=x;
+            }
+        }
         if (checkUnitID==false){
             throw new IDNotRecognisedException("Unit ID not found");
         } else{
             String newLoc;
-            String xLoc=foundUnit.getCurrentLocation()[1];
-            String yLoc=foundUnit.getCurrentLocation()[0];
-            newLoc="("+xLoc+","+yLoc+")"
-            String initialString="#U"+foundUnit.getUnitID()+" TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+newLoc+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident();
+            int xLoc=units.get(unitIndex).getCurrentLocation()[1];
+            int yLoc=units.get(unitIndex).getCurrentLocation()[0];
+            newLoc="("+xLoc+","+yLoc+")";
+            String initialString="U#"+units.get(unitIndex).getUnitId()+" TYPE="+units.get(unitIndex).getType()+" HOME="+units.get(unitIndex).getHome()+" LOC="+newLoc+" STATUS="+units.get(unitIndex).getStatus()+" INCIDENT="+units.get(unitIndex).getWorkingIncident();
             String additionalString1;
             String additionalString2;
-            if (foundUnit.getWorkingIncident().equals(null)){
+            if (units.get(unitIndex).getWorkingIncident()==-1){
                 additionalString1=" INCIDENT=-";
             }else{
-                additionalString1=" INCIDENT="+foundUnit.getWorkingIncident();
+                additionalString1=" INCIDENT="+units.get(unitIndex).getWorkingIncident();
             }
-            if (!(foundUnit.getTicksToComplete()==0)){
-                additionalString2=" WORK="+foundUnit.getTicksToComplete+"\n";
+            if (!(units.get(unitIndex).getTicksToComplete()==0)){
+                additionalString2=" WORK="+units.get(unitIndex).getTicksToComplete()+"\n";
             }else{
-                additionalString2="\n"
+                additionalString2="\n";
             }
-            String outputString=initialString.concat(additionalString1).concat(additionalString2)
+            outputString=initialString.concat(additionalString1).concat(additionalString2);
         }
         return outputString;
     }
@@ -356,12 +385,14 @@ public class CityRescueImpl implements CityRescue {
                 if ((x > getGridSize()[0]) || (y > getGridSize()[1])){
                     throw new InvalidLocationException("Value(s) used for location are invalid");
                 }else{
-                    Incident incident = new incident(type, severity,  x,  y);
+                    Incident incident = new Incident(type, severity,  x,  y);
                     incidents.add(incident);
-                    nextIncidentId++;
-                    IncidentCount++;
-
-        return nextIncidentId-1;
+                    nextIncindentId++;
+                    incidentCount++;
+                }
+            }
+        }
+        return nextIncindentId-1;
     }
 
     @Override
@@ -376,20 +407,20 @@ public class CityRescueImpl implements CityRescue {
         if (index == -1){
             throw new IDNotRecognisedException("Incident not found");
         } else{
-            if (!(incidents.get(index).getStatus().equals(IncidentType.REPORTED) || incidents.get(index).getStatus().equals(IncidentType.DISPATCHED))){
+            if (!(incidents.get(index).getstatus().equals(IncidentStatus.REPORTED) || incidents.get(index).getstatus().equals(IncidentStatus.DISPATCHED))){
                 throw new IllegalStateException("Incident must be reported or dispatched to be cancelled");
             } else{
-                if (incidents.get(index).getStatus().equals(IncidentType.DISPATCHED)){
-                    int unitID=incidents.get(index).getUnitAssignedId()
+                if (incidents.get(index).getstatus().equals(IncidentStatus.DISPATCHED)){
+                    int unitID=incidents.get(index).getUnitAssignedId();
                     for (int i=0; i<units.size(); i++){
-                        if (units.get(i).getUnitID()==unitID){
-                            units.get(i).setStatus(UnitStatus.IDLE)
+                        if (units.get(i).getUnitId()==unitID){
+                            units.get(i).setStatus(UnitStatus.IDLE);
                         }
                     }
                     incidents.get(index).releaseUnit();
                     incidents.get(index).cancelledIncident();
                 }else{
-                    incidents.get(index).cancelIncident();
+                    incidents.get(index).cancelledIncident();
                 }
             }
         }
@@ -410,7 +441,7 @@ public class CityRescueImpl implements CityRescue {
             if (newSeverity <= 1 || newSeverity >=5){
                 throw new InvalidSeverityException("Value used for severity out of range");
             }else{
-                if (incidents.get(index).getstatus().equals(IncidentType.RESOLVED) || incidents.get(index).getstatus().equals(IncidentType.CANCELLED) ){
+                if (incidents.get(index).getstatus().equals(IncidentStatus.RESOLVED) || incidents.get(index).getstatus().equals(IncidentStatus.CANCELLED) ){
                     throw new IllegalStateException("Incident can no longer be escalated as it has been resolved or cancelled");
                 }else{
                     incidents.get(index).escalateSeverity(newSeverity);
@@ -422,10 +453,10 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public int[] getIncidentIds(){
         int[] incidentIdsList = new int[incidents.size()];
-        for(int i=0; i < stations.size();i++){
-            stationIdsList[i] = stations.get(i).getStationId(); 
+        for(int i=0; i < incidents.size();i++){
+            incidentIdsList[i] = incidents.get(i).getincidentId(); 
         }
-        return stationIdsList;
+        return incidentIdsList;
     }
 
     @Override
@@ -443,8 +474,8 @@ public class CityRescueImpl implements CityRescue {
             Incident foundIncident=incidents.get(index);
             String initialString= "I#"+incidentId+" TYPE="+foundIncident.gettype()+" SEV="+foundIncident.getseverity()+" LOC=("+foundIncident.getwidth()+","+foundIncident.getheight()+") STATUS="+foundIncident.getstatus();
             String additionalString;
-            if (!(foundIncident.getUnitAssignedId().equals(null))){
-                additional=" UNIT="+foundIncident.getUnitAssignedId()+"\n";
+            if (!(foundIncident.getUnitAssignedId()==-1)){
+                additionalString=" UNIT="+foundIncident.getUnitAssignedId()+"\n";
             }else{
                 additionalString=" UNIT=-\n";
             }
@@ -458,20 +489,23 @@ public class CityRescueImpl implements CityRescue {
         ArrayList<Incident> reportedIncidents=new ArrayList<>();
         for (int i=0; i<incidents.size(); i++){
             if (incidents.get(i).getstatus().equals(IncidentStatus.REPORTED)){
-                reportedIncidents.add(incidents.get(i))
+                reportedIncidents.add(incidents.get(i));
             }
         }
         for (int x=0; x<reportedIncidents.size(); x++){
             ArrayList<Unit> availableUnits=new ArrayList<>();
             Incident currentIncident=reportedIncidents.get(x);
-            UnitType requiredUnit;
-            switch currentIncident.gettype(){
-                case IncidentType.MEDICAL:
+            UnitType requiredUnit=null;
+            switch (currentIncident.gettype()){
+                case MEDICAL:
                     requiredUnit=UnitType.AMBULANCE;
-                case IncidentType.FIRE:
+                    break;
+                case FIRE:
                     requiredUnit=UnitType.FIRE_ENGINE;
-                case IncidentType.CRIME:
+                    break;
+                case CRIME:
                     requiredUnit=UnitType.POLICE_CAR;
+                    break;
             }
             for (int y=0; y<units.size(); y++){
                 if ((units.get(y).getType().equals(requiredUnit)) && units.get(y).getStatus().equals(UnitStatus.IDLE)){
@@ -480,31 +514,30 @@ public class CityRescueImpl implements CityRescue {
             }
             if (availableUnits.size()>0){
                 ArrayList<Integer> manhattanDistances=new ArrayList<>(); 
-                int smallestManhatten;
-                int smallestManhattenLoc;
-                for (int z=0; availableUnits.size(); z++){
+                int smallestManhatten=Integer.MAX_VALUE;
+                int smallestManhattenLoc=0;
+                for (int z=0; z<availableUnits.size(); z++){
                     int[] currentLoc=availableUnits.get(z).getCurrentLocation();
                     int[] incidentLoc={currentIncident.getheight(), currentIncident.getwidth()};
                     int currentManhatten=(Math.abs(currentLoc[0]-incidentLoc[0]))+(Math.abs(currentLoc[1]-incidentLoc[1]));
-                    manhattanDistance.add(currentManhatten);
-                    if (manhattanDistance.size()==1){
+                    manhattanDistances.add(currentManhatten);
+                    if (manhattanDistances.size()==1){
                         smallestManhatten=currentManhatten;
                         smallestManhattenLoc=0;
                     } else{
-                        if currentManhatten<smallestManhatten{
+                        if (currentManhatten<smallestManhatten){
                             smallestManhatten=currentManhatten;
                             smallestManhattenLoc=z;
                         }
                     }
-                Unit dispatchUnit=availableUnits.get(smallestManhatten);
+                Unit dispatchUnit=availableUnits.get(smallestManhattenLoc);
                 dispatchUnit.setStatus(UnitStatus.EN_ROUTE);
                 currentIncident.setstatus(IncidentStatus.DISPATCHED);
                 dispatchUnit.setWorkingIncident(currentIncident.getincidentId());
-                currentIncident.setUnitAssignedId(dispatchUnit.getUnitID())
+                currentIncident.setUnitAssignedId(dispatchUnit.getUnitId());
                 }
             }
         }
-        throw new ("Not implemented yet");
     }
 
     @Override
@@ -517,69 +550,78 @@ public class CityRescueImpl implements CityRescue {
         ArrayList<Incident> enRouteIncidents=new ArrayList<>();
         ArrayList<Incident> inProgressIncidents=new ArrayList<>();
         for (int i=0; i<units.size(); i++){
-            if units.get(i).getStatus().equals(UnitStatus.EN_ROUTE){
+            if (units.get(i).getStatus().equals(UnitStatus.EN_ROUTE)){
                 enRouteUnits.add(units.get(i));
                 for (int z=0; z<incidents.size(); z++){
-                    if units.get(i).getWorkingIncident().equals(incidents.get(z).getincidentId()){
-                        incidentLocs.add({incidents.get(z).getheight(), incidents.get(z).getwidth()});
+                    if ((units.get(i).getWorkingIncident()==incidents.get(z).getincidentId())){
+                        int[] currentLoc=new int[]{incidents.get(z).getheight(), incidents.get(z).getwidth()};
+                        incidentLocs.add(currentLoc);
                         enRouteIncidents.add(incidents.get(z));
                     }
                 }
             }
-            if units.get(i).getStatus().equals(UnitStatus.AT_SCENE){
-                atSceneUnits.add(units.get(i))
+            if (units.get(i).getStatus().equals(UnitStatus.AT_SCENE)){
+                atSceneUnits.add(units.get(i));
                 for (int z=0; z<incidents.size(); z++){
-                    if units.get(i).getWorkingIncident().equals(incidents.get(z).getincidentId()){
+                    if (units.get(i).getWorkingIncident()==(incidents.get(z).getincidentId())){
                         inProgressIncidents.add(incidents.get(z));
                     }
                 }
             }
         }
         for (int x=0; x<enRouteUnits.size(); x++){
-            currrentLoc=enRouteUnits.get(x).getCurrentLocation();
-            currentIncidentLoc=incidentLocs.get(x);
+            int[] currentLoc=enRouteUnits.get(x).getCurrentLocation();
+            int[] currentIncidentLoc=incidentLocs.get(x);
             ArrayList<int[]> moves=new ArrayList<>();
             ArrayList<Integer> directions=new ArrayList<>();
             for(int y=0; y<4; y++){
-                switch y{
+                switch (y){
                     case 0:
                         if ((currentLoc[0]-1)>=0){
-                            if (CityMap.isMoveLegal({currentLoc[0]-1, currentLoc[1]})){
-                                moves.add({currentLoc[0]-1, currentLoc[1]});
+                            int[] newLoc=new int[]{currentLoc[0]-1, currentLoc[1]};
+                            if (map.isMoveLegal(newLoc)){
+                                moves.add(newLoc);
                                 directions.add(1);
                             }
                         }
+                        break;
                     case 1:
-                        if ((currentLoc[1]+1)<=getGridSize()[1]){
-                            if (CityMap.isMoveLegal({currentLoc[0], currentLoc[1]+1})){
-                                moves.add({currentLoc[0], currentLoc[1]+1});
+                        if ((currentLoc[1]+1)<getGridSize()[1]){
+                            int[] newLoc=new int[]{currentLoc[0], currentLoc[1]+1};
+                            if (map.isMoveLegal(newLoc)){
+                                moves.add(newLoc);
                                 directions.add(2);
                             }
                         }
+                        break;
                     case 2:
-                        if ((currentLoc[0]+1)<=getGridSize()[0]){
-                            if (CityMap.isMoveLegal({currentLoc[0]+1, currentLoc[1]})){
-                                moves.add({currentLoc[0]+1, currentLoc[1]});
+                        if ((currentLoc[0]+1)<getGridSize()[0]){
+                            int[] newLoc=new int[]{currentLoc[0]+1, currentLoc[1]};
+                            if (map.isMoveLegal(newLoc)){
+                                moves.add(newLoc);
                                 directions.add(3);
                             }
                         }
+                        break;
                     case 3:
                         if ((currentLoc[1]-1)>=0){
-                            if (CityMap.isMoveLegal({currentLoc[0], currentLoc[1]-1})){
-                                moves.add({currentLoc[0], currentLoc[1]-1});
+                            int[] newLoc=new int[]{currentLoc[0], currentLoc[1]-1};
+                            if (map.isMoveLegal(newLoc)){
+                                moves.add(newLoc);
                                 directions.add(4);
                             }
                         }
+                        break;
                 }
             }
-            ArrayList<int[]> manhattanDistance=new ArrayList<>();
+            ArrayList<Integer> manhattanDistance=new ArrayList<>();
             for (int j=0; j<moves.size(); j++){
                 int[] currentMove=moves.get(j);
-                manhattanDistance.add(Math.abs(currentMove[0]-currentIncidentLoc[0])+(Math.abs(currentMove[1]-currentIncidentLoc[1])));
-                for (int k=0; k<manhattanDistance-1; k++){
+                manhattanDistance.add(Math.abs((currentMove[0]-currentIncidentLoc[0]))+(Math.abs((currentMove[1]-currentIncidentLoc[1]))));
+                for (int k=0; k<manhattanDistance.size()-1; k++){
                     if (manhattanDistance.get(k)<manhattanDistance.get(k+1)){
                         int tempDist=manhattanDistance.get(k+1);
-                        String tempDir=directions.get(k+1);
+                        int tempDir=directions.get(k+1);
                         int[] tempMove=moves.get(k+1);
                         manhattanDistance.set(k+1, manhattanDistance.get(k));
                         directions.set(k+1, directions.get(k));
@@ -590,47 +632,75 @@ public class CityRescueImpl implements CityRescue {
                     }
                 }
             }
-            int[] chosenMove;
+            int[] chosenMove=new int[2];
             if (manhattanDistance.size()>0){
-                if (manhattanDistance.get(0)==manhattanDistance.get(1)){
-                    if (directions.get(0)>directions.get(1)){
-                        chosenMove=moves.get(0);
+                if (manhattanDistance.get(0)==manhattanDistance.get(1) && manhattanDistance.size()>1){
+                    if (directions.get(0)<directions.get(1)){
+                        chosenMove=moves.get(1);
                     }else{
                         chosenMove=moves.get(0);
                     }
                 }
             }else{
-                chosenMove=currentLoc
+                chosenMove=currentLoc;
             }
-            enRouteUnits.get(x).setLocation(chosenMove)
-            if chosenMove.equals(incidentLocs.get(x)){
-                enRouteUnits.get(x).setStatus(UnitStatus.AT_SCENE)
-                enRouteIncidents.get(x).setstatus(IncidentStatus.IN_PROGRESS)
+            enRouteUnits.get(x).setCurrentLocation(chosenMove);
+            if (java.util.Arrays.equals(chosenMove, incidentLocs.get(x))){
+                enRouteUnits.get(x).setStatus(UnitStatus.AT_SCENE);
+                enRouteIncidents.get(x).setstatus(IncidentStatus.IN_PROGRESS);
             }
         }
         for (int q=0; q<atSceneUnits.size(); q++){
             int workRemaining=atSceneUnits.get(q).getTicksToComplete();
             if (workRemaining==0){
                 atSceneUnits.get(q).setStatus(UnitStatus.IDLE);
-                inProgressIncidents.get(q).setstatus(IncidentStatus.RESOLVED)
-                atSceneUnits.get(q).setWorkingIncident(null)
+                inProgressIncidents.get(q).setstatus(IncidentStatus.RESOLVED);
+                atSceneUnits.get(q).setWorkingIncident(-1);
             }
         }
     }
 
     @Override
-    public String getStatus() {
-        String tickString="TICK="+current_tick+"\n"
-        String countString="STATIONS="+stations.size()+" UNITS="+units.size()+" INCIDENTS="+incidents.size()+" OBSTACLES="+CityMap.getBlockedCells().size()+"\n";
+    public String getStatus(){
+        String tickString="TICK="+current_tick+"\n";
+        String countString="STATIONS="+stations.size()+" UNITS="+units.size()+" INCIDENTS="+incidents.size()+" OBSTACLES="+map.getBlockedCells().size()+"\n";
         String incidentHeader="INCIDENTS\n";
-        String incidentsString;
+        String incidentsString="";
         for (int i=0; i<incidents.size(); i++){
-            incidentsString.concat(viewIncident(incidents.get(i).getincidentId()));
+            Incident foundIncident=incidents.get(i);
+            String initialString= "I#"+foundIncident.getincidentId()+" TYPE="+foundIncident.gettype()+" SEV="+foundIncident.getseverity()+" LOC=("+foundIncident.getwidth()+","+foundIncident.getheight()+") STATUS="+foundIncident.getstatus();
+            String additionalString;
+            if (!(foundIncident.getUnitAssignedId()==-1)){
+                additionalString=" UNIT="+foundIncident.getUnitAssignedId()+"\n";
+            }else{
+                additionalString=" UNIT=-\n";
+            }
+            String tempString1=initialString.concat(additionalString);
+            incidentsString=incidentsString.concat(tempString1);
         }
         String unitsHeader="UNITS\n";
-        String unitsString;
-        for (int x=0; i<units.size(); i++){
-            unitsString.concat(viewUnit(units.get(i).getUnitID()));
+        String unitsString="";
+        for (int x=0; x<units.size(); x++){
+            String newLoc="";
+            String finalUnitString="";
+            int xLoc=units.get(x).getCurrentLocation()[1];
+            int yLoc=units.get(x).getCurrentLocation()[0];
+            newLoc="("+xLoc+","+yLoc+")";
+            String initialString="U#"+units.get(x).getUnitId()+" TYPE="+units.get(x).getType()+" HOME="+units.get(x).getHome()+" LOC="+newLoc+" STATUS="+units.get(x).getStatus()+" INCIDENT="+units.get(x).getWorkingIncident();
+            String additionalString1;
+            String additionalString2;
+            if (units.get(x).getWorkingIncident()==-1){
+                additionalString1=" INCIDENT=-";
+            }else{
+                additionalString1=" INCIDENT="+units.get(x).getWorkingIncident();
+            }
+            if (!(units.get(x).getTicksToComplete()==0)){
+                additionalString2=" WORK="+units.get(x).getTicksToComplete()+"\n";
+            }else{
+                additionalString2="\n";
+            }
+            finalUnitString=initialString.concat(additionalString1).concat(additionalString2);
+            unitsString=unitsString.concat(finalUnitString);
         }
         String outputString=tickString+countString+incidentHeader+incidentsString+unitsHeader+unitsString;
         return outputString;

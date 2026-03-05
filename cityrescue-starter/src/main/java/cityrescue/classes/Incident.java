@@ -1,13 +1,19 @@
-public Incident{
+package cityrescue.classes;
+
+import cityrescue.enums.IncidentStatus;
+import cityrescue.enums.IncidentType;
+
+
+public class Incident{
     private IncidentType type;
-    private int incidentId
+    private int incidentId;
     private int severity;
     private IncidentStatus status;
-    private int unitAssignedId;
+    private int unitAssignedId=-1;
     private int height;
     private int width;
 
-    public int gettype(){
+    public IncidentType gettype(){
         return type;
     }
     public int getincidentId(){
@@ -16,11 +22,11 @@ public Incident{
     public int getseverity(){
         return severity;
     }
-    public int getstatus(){
+    public IncidentStatus getstatus(){
         return status;
+    }
     public void setstatus(IncidentStatus newStatus){
         status=newStatus;
-    }
     }
     public int getheight(){
         return height;
@@ -49,9 +55,9 @@ public Incident{
         this.status = IncidentStatus.DISPATCHED;
     }
     public void releaseUnit(){
-        this.unitAssignedId = null;
+        int unitAssignedId;
     }
-    public void escalateSeverity(newSeverity){
+    public void escalateSeverity(int newSeverity){
         this.severity = newSeverity;
     }
 }
