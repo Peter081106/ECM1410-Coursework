@@ -41,7 +41,8 @@ public class Incident{
         this.unitAssignedId=unitAssignedId;
     }
 
-    public Incident(IncidentType type, int severity, int height, int width){
+    public Incident(int Id, IncidentType type, int severity, int height, int width){
+        this.incidentId=Id;
         this.type = type;
         this.status = IncidentStatus.REPORTED;
         this.severity = severity;
@@ -53,9 +54,6 @@ public class Incident{
     }
     public void dispatchedIncident(){
         this.status = IncidentStatus.DISPATCHED;
-    }
-    public void releaseUnit(){
-        int unitAssignedId;
     }
     public void escalateSeverity(int newSeverity){
         this.severity = newSeverity;
