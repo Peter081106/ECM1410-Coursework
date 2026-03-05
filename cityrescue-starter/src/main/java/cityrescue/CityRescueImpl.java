@@ -640,18 +640,13 @@ public class CityRescueImpl implements CityRescue {
 
     /**
      * this method assigns units to incidents
-     * first will search the list of incidents for any that the status is reported which will be added to an array list of reported incidents
-     * for each reported incident, it is then determined the type of the incident 
-     * then any unit which matches the type of the incident will be added to the available units array
-     * it is then checked that the array has items in it
-     * an array list of manhattan distances is created
-     * the incident location is then stored and the location of the incident and then the manhattan distance is calculated.
-     * this is then added to the array of manhattan distances
-     * if there is only one smallest manhattan distance, then that will be saved.
-     * if there are multiple, then the one with the lowest id number will be saved.
-     * after this, the closest unit is then dispatched
-     * the incident is then updated.
-     */
+     * first will search the list of incidents for any incident with a status of reported will be added to an array of reported incidents.
+     *  For each reported incident, it is then determined the type of the incident, in order to correctly attribute a corresponding unit.
+     *  Any and all corresponding units are then passed through a tie-breaker loop based on smallest manhatten distance.
+     *  Those with equal manhattan distance from the incident are automatically further tie-broken via unitID, as unit objects are
+     *  initally collated into an array ordered by their IDs. As unitIDs are unique, no further tie-breaker is required.
+     *  Once a unit has been selected, both the unit and incident status are updated to the correct status and exchange IDs for further
+     *  correspondance in later methods.*/
 
     @Override
     public void dispatch() {
@@ -708,6 +703,18 @@ public class CityRescueImpl implements CityRescue {
             }
         }
     }
+
+/**After incrementing the global tick, arrays of en route and active units are established, along with their corresponding incidents and locations.
+ *  En route units are dealt with first, with each potential move (North, East, South or West) being considered
+ *  for move legality and boudary errors in the correct given order, using a switch-case statement for added efficency
+ *  over repeated if statements. Decision-making between legal moves is then undertaked, using the deterministic movement rules
+ *  provided to establish the most optimal move, with the order of directions being imposed using a ranking system of 1-4.
+ *  Once done, the move is undertaken, with status changes for the unit and incident if the incident location is reached.
+ *  At work units are then processed, using each specific unit type's abstract methods to ensure units are at work for the
+ *  correct amount of time, resolving any incidents that have been completed by reseting the unit's completed ticks
+ *  and returning its status to idle, along with the incident.
+ * 
+ */
 
     @Override
     public void tick() {
