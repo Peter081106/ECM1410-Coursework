@@ -54,7 +54,6 @@ public class CityRescueImpl implements CityRescue {
             units=new ArrayList<>();
             incidents=new ArrayList<>();
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override 
@@ -62,7 +61,6 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         int[] gridSize={grid.size(), grid.get(0).size()};
         return gridSize;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -78,7 +76,6 @@ public class CityRescueImpl implements CityRescue {
                 System.out.println("Location currently in use with a: "+grid.get(x).get(y));
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -94,7 +91,6 @@ public class CityRescueImpl implements CityRescue {
                 System.out.println("No roadblock in selected location");
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
         @Override
@@ -115,7 +111,6 @@ public class CityRescueImpl implements CityRescue {
         stationCount++;
 
         return nextStationId-1;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -137,7 +132,6 @@ public class CityRescueImpl implements CityRescue {
                 stationCount--;
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -162,7 +156,6 @@ public class CityRescueImpl implements CityRescue {
                 }
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -172,7 +165,6 @@ public class CityRescueImpl implements CityRescue {
             stationIdsList[i] = stations.get(i).getStationId(); 
         }
         return stationIdsList;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -215,7 +207,6 @@ public class CityRescueImpl implements CityRescue {
             }
         }
         return currentUnitID-1;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -248,7 +239,6 @@ public class CityRescueImpl implements CityRescue {
             units.remove(arrayLoc)
 
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -284,7 +274,6 @@ public class CityRescueImpl implements CityRescue {
                 }
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -309,7 +298,6 @@ public class CityRescueImpl implements CityRescue {
                 }
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -320,7 +308,6 @@ public class CityRescueImpl implements CityRescue {
             unitIDs[i]=units.get(i).getUnitId();
         }
         return unitIDs;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -430,7 +417,6 @@ public class CityRescueImpl implements CityRescue {
                 }
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
      }
 
     @Override
@@ -440,7 +426,6 @@ public class CityRescueImpl implements CityRescue {
             stationIdsList[i] = stations.get(i).getStationId(); 
         }
         return stationIdsList;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -631,7 +616,6 @@ public class CityRescueImpl implements CityRescue {
                 atSceneUnits.get(q).setWorkingIncident(null)
             }
         }
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -650,6 +634,5 @@ public class CityRescueImpl implements CityRescue {
         }
         String outputString=tickString+countString+incidentHeader+incidentsString+unitsHeader+unitsString;
         return outputString;
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
