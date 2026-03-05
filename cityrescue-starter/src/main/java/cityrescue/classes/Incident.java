@@ -13,6 +13,10 @@ public class Incident{
     private int height;
     private int width;
 
+    /**
+     * the following few methods are getter methods and will return the attribute that has been requested
+     */
+
     public IncidentType gettype(){
         return type;
     }
@@ -41,6 +45,10 @@ public class Incident{
         this.unitAssignedId=unitAssignedId;
     }
 
+    /**
+     * this method will set the unit assigned id to whatever is given
+     */
+
     public Incident(int Id, IncidentType type, int severity, int height, int width){
         this.incidentId=Id;
         this.type = type;
@@ -49,12 +57,25 @@ public class Incident{
         this.width = width;
         this.height = height;
     }
+
+    /**
+     * will change incident status to cancelled
+     */
     public void cancelledIncident(){
         this.status = IncidentStatus.CANCELLED;
     }
+
+    /**
+     * will change incident status to dispatched
+     */
+
     public void dispatchedIncident(){
         this.status = IncidentStatus.DISPATCHED;
     }
+
+    /**
+     * will change the severity of the incident to a new severity that has been given
+     */
     public void escalateSeverity(int newSeverity){
         this.severity = newSeverity;
     }

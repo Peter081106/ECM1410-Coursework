@@ -16,12 +16,23 @@ public abstract class Unit{
     public abstract int getTicksToComplete();
     public abstract void incrementWork();
 
+    /**
+     * this will set the attributes of the object using the variables given
+     * 
+     */
+
+
     public Unit(int unitID, UnitType type, int homeStation, int[] location){
         this.id=unitID;
         this.type=type;
         this.home=homeStation;
         this.currentLocation=location;
     }
+
+    /**
+     * the getter methods will return the requested attributes
+     * the setter methods will change the attribute of the object to whatever has been passed.
+     */
 
     public int getUnitId(){
         return id;
