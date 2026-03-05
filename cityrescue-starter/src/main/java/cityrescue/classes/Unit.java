@@ -62,6 +62,8 @@ class Ambulance extends Unit{
         int remainingTicks=taskTick-ticksCompleted;
         if (remainingTicks==0){
             ticksCompleted=0;
+        }else{
+            ticksCompleted++;
         }
         return remainingTicks;
     }

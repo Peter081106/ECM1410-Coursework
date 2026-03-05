@@ -340,13 +340,22 @@ public class CityRescueImpl implements CityRescue {
             String xLoc=foundUnit.getCurrentLocation()[1];
             String yLoc=foundUnit.getCurrentLocation()[0];
             newLoc="("+xLoc+","+yLoc+")"
-            unitString="TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+newLoc+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident();
-            if (!(foundUnit.getTicksToComplete()==0)){
-                unitString+=" WORK="+foundUnit.getTicksToComplete;
+            String initialString="#U"+foundUnit.getUnitID()+" TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+newLoc+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident();
+            String additionalString1;
+            String additionalString2;
+            if (foundUnit.getWorkingIncident().equals(null)){
+                additionalString1=" INCIDENT=-";
+            }else{
+                additionalString1=" INCIDENT="+foundUnit.getWorkingIncident();
             }
+            if (!(foundUnit.getTicksToComplete()==0)){
+                additionalString2=" WORK="+foundUnit.getTicksToComplete+"\n";
+            }else{
+                additionalString2="\n"
+            }
+            String outputString=initialString.concat(additionalString1).concat(additionalString2)
         }
-        return unitString;
-        throw new UnsupportedOperationException("Not implemented yet");
+        return outputString;
     }
 
     @Override
@@ -366,9 +375,6 @@ public class CityRescueImpl implements CityRescue {
                     IncidentCount++;
 
         return nextIncidentId-1;
-        
-
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -441,95 +447,188 @@ public class CityRescueImpl implements CityRescue {
     public String viewIncident(int incidentId) throws IDNotRecognisedException {
         int index = -1;
         for(int i=0; i < incidentCount;i++){
-            if(incidents[i].getincidentId() == incidentId){
+            if(incidents.get(i).getincidentId() == incidentId){
                 index = i;
                 break;
             }
         }
         if (index == -1){
-            throw new IDNotRecognisedException();
-        return "I#"+str(incidentId)+" TYPE="+str(incidents[index].gettype())+" SEV="+str(incidents[index].getseverity())+" LOC=("+str(incidents[index].getwidth())+","+str(incidents[index].getheight())+") STATUS="+str(incidents[index].getstatus())+" UNIT="+str(incidents[index].getunitAssignedId())
-        throw new UnsupportedOperationException("Not implemented yet");
+            throw new IDNotRecognisedException("Incident ID not found");
+        }else{
+            Incident foundIncident=incidents.get(index);
+            String initialString= "I#"+incidentId+" TYPE="+foundIncident.gettype()+" SEV="+foundIncident.getseverity()+" LOC=("+foundIncident.getwidth()+","+foundIncident.getheight()+") STATUS="+foundIncident.getstatus();
+            String additionalString;
+            if (!(foundIncident.getUnitAssignedId().equals(null))){
+                additional=" UNIT="+foundIncident.getUnitAssignedId()+"\n";
+            }else{
+                additionalString=" UNIT=-\n";
+            }
+            String outputString=initialString.concat(additionalString);
+            return outputString;
+        }
     }
 
     @Override
     public void dispatch() {
-        // creates a list of the indexes of the ids
-        int largestDistance = 0
-        ArrayList<Integer> shortestManhattan = new ArrayList<Integer>;
-        ArrayList<Integer> sameIds = new ArrayList<Integer>;
-        for(int i=0; i < incidentCount;i++){
-            if (incidents[i].getstatus.equals((DISPATCHED)){
-                manhattanDistance = (Math.abs(incidents[i].getheight()-incidents[i].getunitAssignedId().getCurrentLocation[0])) + (Math.abs(incidents[i].getwidth()-incidents[i].getunitAssignedId().getCurrentLocation[1]))
-                if (manhattanDistance > largestDistance){
-                    shortestManhattan.clear()
-                    shortestManhattan.add(i);
-                }
-                if (manhattanDistance == largestDistance){
-                    shortestManhattan.add(i);
+        ArrayList<Incident> reportedIncidents=new ArrayList<>();
+        for (int i=0; i<incidents.size(); i++){
+            if (incidents.get(i).getstatus().equals(IncidentStatus.REPORTED)){
+                reportedIncidents.add(incidents.get(i))
+            }
+        }
+        for (int x=0; x<reportedIncidents.size(); x++){
+            ArrayList<Unit> availableUnits=new ArrayList<>();
+            Incident currentIncident=reportedIncidents.get(x);
+            UnitType requiredUnit;
+            switch currentIncident.gettype(){
+                case IncidentType.MEDICAL:
+                    requiredUnit=UnitType.AMBULANCE;
+                case IncidentType.FIRE:
+                    requiredUnit=UnitType.FIRE_ENGINE;
+                case IncidentType.CRIME:
+                    requiredUnit=UnitType.POLICE_CAR;
+            }
+            for (int y=0; y<units.size(); y++){
+                if ((units.get(y).getType().equals(requiredUnit)) && units.get(y).getStatus().equals(UnitStatus.IDLE)){
+                    availableUnits.add(units.get(y));
                 }
             }
-<<<<<<< HEAD
-        if (shortestManhattan.size() == 1){
-            incidents[shortestManhattan[0]]
-=======
->>>>>>> 9b7c27e9f521a1c0abd2b4de3acd8f22c0896b54
-        }
-
-        if shortestManhattan.length() == 1{
-            lowestId = shortestManhattan[0]
-        }
-
-        if shortestManhattan.length() > 1{
-            int lowestId = shortestManhattan[0];
-            for(int i=0; i < shortestManhattan.length();i++){
-                if (shortestManhattan[i] < lowestId){
-                    lowestId = shortestManhattan[i];
+            if (availableUnits.size()>0){
+                ArrayList<Integer> manhattanDistances=new ArrayList<>(); 
+                int smallestManhatten;
+                int smallestManhattenLoc;
+                for (int z=0; availableUnits.size(); z++){
+                    int[] currentLoc=availableUnits.get(z).getCurrentLocation();
+                    int[] incidentLoc={currentIncident.getheight(), currentIncident.getwidth()};
+                    int currentManhatten=(Math.abs(currentLoc[0]-incidentLoc[0]))+(Math.abs(currentLoc[1]-incidentLoc[1]));
+                    manhattanDistance.add(currentManhatten);
+                    if (manhattanDistance.size()==1){
+                        smallestManhatten=currentManhatten;
+                        smallestManhattenLoc=0;
+                    } else{
+                        if currentManhatten<smallestManhatten{
+                            smallestManhatten=currentManhatten;
+                            smallestManhattenLoc=z;
+                        }
+                    }
+                Unit dispatchUnit=availableUnits.get(smallestManhatten);
+                dispatchUnit.setStatus(UnitStatus.EN_ROUTE);
+                currentIncident.setstatus(IncidentStatus.DISPATCHED);
+                dispatchUnit.setWorkingIncident(currentIncident.getincidentId());
+                currentIncident.setUnitAssignedId(dispatchUnit.getUnitID())
                 }
             }
-        
         }
-
         throw new ("Not implemented yet");
     }
 
     @Override
     public void tick() {
         // TODO: implement
-        current_tick++
+        current_tick++;
         ArrayList<Unit> enRouteUnits= new ArrayList<>();
+        ArrayList<Unit> atSceneUnits= new ArrayList<>();
+        ArrayList<int[]> incidentLocs=new ArrayList<>();
+        ArrayList<Incident> enRouteIncidents=new ArrayList<>();
+        ArrayList<Incident> inProgressIncidents=new ArrayList<>();
         for (int i=0; i<units.size(); i++){
             if units.get(i).getStatus().equals(UnitStatus.EN_ROUTE){
-                enRouteUnits.add(units.get(i))
+                enRouteUnits.add(units.get(i));
+                for (int z=0; z<incidents.size(); z++){
+                    if units.get(i).getWorkingIncident().equals(incidents.get(z).getincidentId()){
+                        incidentLocs.add({incidents.get(z).getheight(), incidents.get(z).getwidth()});
+                        enRouteIncidents.add(incidents.get(z));
+                    }
+                }
+            }
+            if units.get(i).getStatus().equals(UnitStatus.AT_SCENE){
+                atSceneUnits.add(units.get(i))
+                for (int z=0; z<incidents.size(); z++){
+                    if units.get(i).getWorkingIncident().equals(incidents.get(z).getincidentId()){
+                        inProgressIncidents.add(incidents.get(z));
+                    }
+                }
             }
         }
         for (int x=0; x<enRouteUnits.size(); x++){
             currrentLoc=enRouteUnits.get(x).getCurrentLocation();
+            currentIncidentLoc=incidentLocs.get(x);
             ArrayList<int[]> moves=new ArrayList<>();
+            ArrayList<Integer> directions=new ArrayList<>();
             for(int y=0; y<4; y++){
                 switch y{
                     case 0:
                         if ((currentLoc[0]-1)>=0){
-                            moves.add({currentLoc[0]-1, currentLoc[0]});
+                            if (CityMap.isMoveLegal({currentLoc[0]-1, currentLoc[1]})){
+                                moves.add({currentLoc[0]-1, currentLoc[1]});
+                                directions.add(1);
+                            }
                         }
                     case 1:
                         if ((currentLoc[1]+1)<=getGridSize()[1]){
-                            moves.add({currentLoc[0], currentLoc[0]+1});
+                            if (CityMap.isMoveLegal({currentLoc[0], currentLoc[1]+1})){
+                                moves.add({currentLoc[0], currentLoc[1]+1});
+                                directions.add(2);
+                            }
                         }
                     case 2:
                         if ((currentLoc[0]+1)<=getGridSize()[0]){
-                            moves.add({currentLoc[0]+1, currentLoc[0]});
+                            if (CityMap.isMoveLegal({currentLoc[0]+1, currentLoc[1]})){
+                                moves.add({currentLoc[0]+1, currentLoc[1]});
+                                directions.add(3);
+                            }
                         }
                     case 3:
                         if ((currentLoc[1]-1)>=0){
-                            moves.add({currentLoc[0], currentLoc[0]-1});
+                            if (CityMap.isMoveLegal({currentLoc[0], currentLoc[1]-1})){
+                                moves.add({currentLoc[0], currentLoc[1]-1});
+                                directions.add(4);
+                            }
                         }
-                ArrayList<Integer> manhattanDistance=new ArrayList<>();
-                for (int j=0; j<moves.size(); j++){
-                    int[] currentMove=moves.get(j)
-                    manhattanDistance.add([(currentMove[0]-)])
                 }
+            }
+            ArrayList<int[]> manhattanDistance=new ArrayList<>();
+            for (int j=0; j<moves.size(); j++){
+                int[] currentMove=moves.get(j);
+                manhattanDistance.add(Math.abs(currentMove[0]-currentIncidentLoc[0])+(Math.abs(currentMove[1]-currentIncidentLoc[1])));
+                for (int k=0; k<manhattanDistance-1; k++){
+                    if (manhattanDistance.get(k)<manhattanDistance.get(k+1)){
+                        int tempDist=manhattanDistance.get(k+1);
+                        String tempDir=directions.get(k+1);
+                        int[] tempMove=moves.get(k+1);
+                        manhattanDistance.set(k+1, manhattanDistance.get(k));
+                        directions.set(k+1, directions.get(k));
+                        moves.set(k+1, moves.get(k));
+                        manhattanDistance.set(k, tempDist);
+                        directions.set(k, tempDir);
+                        moves.set(k, tempMove);
+                    }
                 }
+            }
+            int[] chosenMove;
+            if (manhattanDistance.size()>0){
+                if (manhattanDistance.get(0)==manhattanDistance.get(1)){
+                    if (directions.get(0)>directions.get(1)){
+                        chosenMove=moves.get(0);
+                    }else{
+                        chosenMove=moves.get(0);
+                    }
+                }
+            }else{
+                chosenMove=currentLoc
+            }
+            enRouteUnits.get(x).setLocation(chosenMove)
+            if chosenMove.equals(incidentLocs.get(x)){
+                enRouteUnits.get(x).setStatus(UnitStatus.AT_SCENE)
+                enRouteIncidents.get(x).setstatus(IncidentStatus.IN_PROGRESS)
+            }
+        }
+        for (int q=0; q<atSceneUnits.size(); q++){
+            int workRemaining=atSceneUnits.get(q).getTicksToComplete();
+            if (workRemaining==0){
+                atSceneUnits.get(q).setStatus(UnitStatus.IDLE);
+                inProgressIncidents.get(q).setstatus(IncidentStatus.RESOLVED)
+                atSceneUnits.get(q).setWorkingIncident(null)
             }
         }
         throw new UnsupportedOperationException("Not implemented yet");
@@ -537,22 +636,20 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public String getStatus() {
-        
-        String finalGetStatusString = "TICK="+str(current_tick)+" \n
-        STATIONS="+str(stationCount)+" UNITS="+unitIDs.length()+" INCIDENTS="+str(incidentCount)+" OBSTACLES="+str(getBlockedCells().size())+" \n
-        INCIDENTS \n"
-        for(int i=0; i < incidentCount;i++){
-            finalGetStatusString = finalGetStatusString + viewIncident(incidents[i])+"\n"
+        String tickString="TICK="+current_tick+"\n"
+        String countString="STATIONS="+stations.size()+" UNITS="+units.size()+" INCIDENTS="+incidents.size()+" OBSTACLES="+CityMap.getBlockedCells().size()+"\n";
+        String incidentHeader="INCIDENTS\n";
+        String incidentsString;
+        for (int i=0; i<incidents.size(); i++){
+            incidentsString.concat(viewIncident(incidents.get(i).getincidentId()));
         }
-        finalGetStatusString = finalGetStatusString + "UNITS \n"
-        for(int i=0; i < unitIds.length();i++){
-            finalGetStatusString = finalGetStatusString + viewIncident(unitIds[i])+"\n"
+        String unitsHeader="UNITS\n";
+        String unitsString;
+        for (int x=0; i<units.size(); i++){
+            unitsString.concat(viewUnit(units.get(i).getUnitID()));
         }
-
-        
-        
-
-        
+        String outputString=tickString+countString+incidentHeader+incidentsString+unitsHeader+unitsString;
+        return outputString;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

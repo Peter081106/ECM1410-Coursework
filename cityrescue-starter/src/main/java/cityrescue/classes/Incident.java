@@ -18,6 +18,9 @@ public Incident{
     }
     public int getstatus(){
         return status;
+    public void setstatus(IncidentStatus newStatus){
+        status=newStatus;
+    }
     }
     public int getheight(){
         return height;
@@ -28,13 +31,16 @@ public Incident{
     public int getUnitAssignedId(){
         return unitAssignedId;
     }
+    public void setUnitAssignedId(int unitAssignedId){
+        this.unitAssignedId=unitAssignedId;
+    }
 
-    public Incident(IncidentType type, int severity, int x, int y){
+    public Incident(IncidentType type, int severity, int height, int width){
         this.type = type;
         this.status = IncidentStatus.REPORTED;
         this.severity = severity;
-        this.x = x;
-        this.y = y;
+        this.width = width;
+        this.height = height;
     }
     public void cancelledIncident(){
         this.status = IncidentStatus.CANCELLED;
