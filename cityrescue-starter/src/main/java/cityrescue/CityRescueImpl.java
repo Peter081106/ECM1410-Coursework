@@ -5,6 +5,7 @@ import classes.*;
 import cityrescue.exceptions.*;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.util.List;
 
 /**
  * CityRescueImpl (Starter)
@@ -17,19 +18,19 @@ public class CityRescueImpl implements CityRescue {
     // TODO: add fields (map, arrays for stations/units/incidents, counters, tick, etc.)
     private ArrayList<ArrayList<GridStatus>> grid;
     private int current_tick=0;
-    final int MAX_UNITS=50
-    private Unit[] units=[MAX_UNITS];
+    private final int MAX_UNITS=50;
+    private List<Unit> units=new ArrayList<>();
     private int currentUnitID=0;
 
-    int maxStations = 20;
-    int maxUnits = 5;
-    int maxIncidents = 200;
-    Station[] stations = new Station[maxStations];
-    int nextStationId = 1;
-    int stationCount = 0;
-    Incident[] incidents = new Incident[maxIncidents];
-    int nextIncindentId = 1;
-    int incidentCount = 0;
+    private int maxStations = 20;
+    private int maxUnits = 5;
+    private int maxIncidents = 200;
+    private List<Station> stations = new ArrayList<>();
+    private int nextStationId = 1;
+    private int stationCount = 0;
+    private List<Incident> incidents = new ArrayList<>();
+    private int nextIncindentId = 1;
+    private int incidentCount = 0;
 
 
     @Override
@@ -37,18 +38,22 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         if (width<0 || height<0){
             throw new InvalidGridException("Invalid values for grid initialisation used");
-        }
-        ArrayList<ArrayList<GridStatus>> tempGrid;
-            for (int x=0;x<height;x++){
-                ArrayList<GridStatus> row=new ArrayList<>();
-                for (int y=0;y<width;y++){
-                    row.add(GridStatus.OPEN);
+        }else{
+            ArrayList<ArrayList<GridStatus>> tempGrid;
+                for (int x=0;x<height;x++){
+                    ArrayList<GridStatus> row=new ArrayList<>();
+                    for (int y=0;y<width;y++){
+                        row.add(GridStatus.OPEN);
+                    }
+                    tempGrid.add(row);
                 }
-                tempGrid.add(row);
-            }
-        grid=tempGrid;
-        CityMap map=new CityMap(tempGrid);  
-        current_tick=0;
+            grid=tempGrid;
+            CityMap map=new CityMap(tempGrid);  
+            current_tick=0;
+            stations=new ArrayList<>();
+            units=new ArrayList<>();
+            incidents=new ArrayList<>();
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -99,12 +104,12 @@ public class CityRescueImpl implements CityRescue {
             throw new InvalidNameException();
         }
         if ((x > getGridSize()[0]) || (y > getGridSize()[1])){
-            throw new InvalidLocationException();
+            throw new InvalidLocationException("Value(s) for location not in range");
         }
 
 
         Station station = new station(nextStationId,name,x,y,maxUnits);
-        stations[nextStationId] = station;
+        stations.add(station);
 
         nextStationId++;
         stationCount++;
@@ -117,58 +122,54 @@ public class CityRescueImpl implements CityRescue {
     public void removeStation(int stationId) throws IDNotRecognisedException, IllegalStateException {
         int index = -1;
         for(int i=0; i < stationCount;i++){
-            if(stations[i].getStationId() == stationId){
+            if(stations.get(i).getStationId() == stationId){
                 index = i;
                 break;
             }
         }
         if (index == -1){
-            throw new IDNotRecognisedException();
+            throw new IDNotRecognisedException("Station ID not found");
+        } else{
+            if (stations.get(index).getunitCount() == 0){
+                throw new IllegalStateException("No stations to be removed");
+            } else{
+                stations.remove(index);
+                stationCount--;
+            }
         }
-        if (stations[index].getunitCount == 0){
-            return IllegalStateException();
-        }
-        for(int i=index; i < stationCount-1;i++){
-            stations[i] = stations[i+1];
-        }
-        stations[size(stations)-1] = null;
-        stationCount--;
-        
-
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void setStationCapacity(int stationId, int maxUnits) throws IDNotRecognisedException, InvalidCapacityException {
         int index = -1;
-        for(int i=0; i < size(stations);i++){
-            if(stations[i].getStationId() == stationId){
+        for(int i=0; i < stations.size();i++){
+            if(stations.get(i).getStationId() == stationId){
                 index = i;
                 break;
             }
         }
         if (index == -1){
-            throw new IDNotRecognisedException();
+            throw new IDNotRecognisedException("Station ID not found");
+        } else{
+            if (maxUnits <= 0){
+                throw new InvalidCapacityException("Max units cannot be 0 or less");
+            }else{
+                if (stations.get(i).getunitCount() >= maxUnits){
+                    throw new InvalidCapacityException("Max capacity must be equal to or larger than current units of"+stations.get(i).getunitCount);
+                } else{
+                    stations.get(i).setMaxUnits(maxUnits);
+                }
+            }
         }
-        if (maxUnits < 0){
-            throw new InvalidCapacityException();
-        }
-        if (stations[index].getunitCount() > maxUnits){
-            throw new InvalidCapacityException();
-        }
-
-        stations[index] = stations[index].setmaxUnits(maxUnits);
-        return "Capacity Updated.";
-
-
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public int[] getStationIds() {
-        int[] stationIdsList = size(stations);
-        for(int i=0; i < size(stations);i++){
-            stationIdsList[i] = stations[i].getStationId(); 
+        int[] stationIdsList = new int[stations.size()];
+        for(int i=0; i < stations.size();i++){
+            stationIdsList[i] = stations.get(i).getStationId(); 
         }
         return stationIdsList;
         throw new UnsupportedOperationException("Not implemented yet");
@@ -179,10 +180,10 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         boolean idCheck=false;
         Station foundStation;
-        for (int i=0; i<stations.length(); i++){
-            if stations[i].getstationId().equals(stationId){
+        for (int i=0; i<stations.size(); i++){
+            if stations.get(i).getstationId().equals(stationId){
                 idCheck=true;
-                foundStation=stations[i];
+                foundStation=stations.get(i);
                 int[] stationLoc={foundStation.getx(), foundStation.gety()}
             }
         }
@@ -192,16 +193,7 @@ public class CityRescueImpl implements CityRescue {
             if (foundStation.getmaxUnits().equals(foundStation.getUnitCount())){
                 throw new IllegalStateException("Max units in station already reached");
             } else{
-                int nullLoc=-1;
-                boolean endwhile=false;
-                int index=0;
-                while (endwhile==false && index<units.length()){
-                    if (units[index].equals(null)){
-                        nullLoc=index;
-                        endwhile=true;
-                    }
-                }
-                if (nullLoc==-1){
+                if (units.size()==MAX_UNITS){
                     throw new InvalidUnitException("Max units already reached")
                 }else{
                     if type.equals(null){
@@ -216,13 +208,13 @@ public class CityRescueImpl implements CityRescue {
                                 newUnit=new FireEngine(currentUnitID, foundStation.getstationId(), stationLoc)
                         }
                         currentUnitID+=1;
-                        units[nullLoc]=newUnit
+                        units.add(newUnit)
                         foundStation.addUnit(newUnit);
                     }
                 }
             }
         }
-        return currentUnitID;
+        return currentUnitID-1;
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -231,10 +223,10 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         boolean checkID=false;
         Unit foundUnit;
-        for (int i=0; i<units.length(); i++){
-            if (units[i].getUnitID().equals(unitID)){
+        for (int i=0; i<units.size(); i++){
+            if (units.get(i).getUnitID().equals(unitID)){
                 checkID=true;
-                foundUnit=units[i];
+                foundUnit=units.get(i);
                 int arrayLoc=i
             }
         }
@@ -247,13 +239,13 @@ public class CityRescueImpl implements CityRescue {
         } else{
             int homeStation=foundUnit.getHome();
             Station foundStation;
-            for (int x=0; x<stations.length(); i++){
-                if stations[x].getstationId().equals(stationId){
-                    foundStation=stations[x];
+            for (int x=0; x<stations.size(); x++){
+                if stations.get(x).getstationId().equals(stationId){
+                    foundStation=stations.get(x);
                 }
             }
             foundStation.removeUnit(foundUnit.getUnitID());
-            units[arrayLoc]=null;
+            units.remove(arrayLoc)
 
         }
         throw new UnsupportedOperationException("Not implemented yet");
@@ -266,15 +258,15 @@ public class CityRescueImpl implements CityRescue {
         boolean checkUnitID=false;
         Station foundStation;
         Unit foundUnit;
-        for (int i=0; i<stations.length(); i++){
-            if stations[i].getstationId().equals(newStationId){
+        for (int i=0; i<stations.size(); i++){
+            if stations.get(i).getstationId().equals(newStationId){
                 checkStationID=true;
-                foundStation=stations[i];
-                int[] stationLoc={foundStation.getx(), foundStation.gety()}
+                foundStation=stations.get(i);
+                int[] stationLoc={foundStation.getheight(), foundStation.getwidth()}
             }
         }
-        for (int x=0; x<units.length(); i++){
-            if (units[i].getUnitID().equals(unitID)){
+        for (int x=0; x<units.size(); i++){
+            if (units.get(i).getUnitID().equals(unitID)){
                 checkUnitID=true;
                 foundUnit=units.get(i);
         }
@@ -300,10 +292,10 @@ public class CityRescueImpl implements CityRescue {
         // TODO: implement
         Unit foundUnit;
         boolean checkUnitID=false;
-        for (int x=0; x<units.length(); i++){
-            if (units[i].getUnitID().equals(unitID)){
+        for (int x=0; x<units.size(); i++){
+            if (units.get(i).getUnitID().equals(unitID)){
                 checkUnitID=true;
-                foundUnit=units[i];
+                foundUnit=units.get(i);
         if (checkUnitID==false){
             throw new IDNotRecognisedException("Unit ID not found");
         } else{
@@ -323,9 +315,9 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public int[] getUnitIds() {
         // TODO: implement
-        int[] unitIDs=int[units.length()];
-        for (int i=0; i<units.length(); i++){
-            unitIDs[i]=units[i].getUnitId();
+        int[] unitIDs=new int[units.size()];
+        for (int i=0; i<units.size(); i++){
+            unitIDs[i]=units.get(i).getUnitId();
         }
         return unitIDs;
         throw new UnsupportedOperationException("Not implemented yet");
@@ -337,14 +329,21 @@ public class CityRescueImpl implements CityRescue {
         String unitString;
         Unit foundUnit;
         boolean checkUnitID=false;
-        for (int x=0; x<units.length(); i++){
-            if (units[i].getUnitID().equals(unitID)){
+        for (int x=0; x<units.size(); x++){
+            if (units.get(x).getUnitID().equals(unitID)){
                 checkUnitID=true;
-                foundUnit=units[i];
+                foundUnit=units.get(i);
         if (checkUnitID==false){
             throw new IDNotRecognisedException("Unit ID not found");
         } else{
-            unitString="TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+foundUnit.getCurrentLocation()+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident()+" WORK="+foundUnit.getTicksToComplete;
+            String newLoc;
+            String xLoc=foundUnit.getCurrentLocation()[1];
+            String yLoc=foundUnit.getCurrentLocation()[0];
+            newLoc="("+xLoc+","+yLoc+")"
+            unitString="TYPE="+foundUnit.getType()+" HOME="+foundUnit.getHome()+" LOC="+newLoc+" STATUS="+foundUnit.getStatus()+" INCIDENT="+foundUnit.getWorkingIncident();
+            if (!(foundUnit.getTicksToComplete()==0)){
+                unitString+=" WORK="+foundUnit.getTicksToComplete;
+            }
         }
         return unitString;
         throw new UnsupportedOperationException("Not implemented yet");
@@ -353,20 +352,20 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public int reportIncident(IncidentType type, int severity, int x, int y) throws InvalidSeverityException, InvalidLocationException {
         if(type == null){
-            throw new Invalid();
-        }
-        if (severity <= 1 || severity >=5){
-            throw new InvalidSeverityException();
-        }
-        //need to code if location is in bounds and not blocked .getBlockedCells
+            throw new InvalidSeverityException("Invalid type used for incident");
+        }else{
+            if (severity <= 1 || severity >=5){
+                throw new InvalidSeverityException("Invalid value used for severity");
+            }else{
+                if ((x > getGridSize()[0]) || (y > getGridSize()[1])){
+                    throw new InvalidLocationException("Value(s) used for location are invalid");
+                }else{
+                    Incident incident = new incident(type, severity,  x,  y);
+                    incidents.add(incident);
+                    nextIncidentId++;
+                    IncidentCount++;
 
-        Incident incident = new incident(type, severity,  x,  y);
-        incidents[nextIncindentId] = incident;
-
-        nextIncidentId++;
-        IncidentCount++;
-
-        return nextStationId-1;
+        return nextIncidentId-1;
         
 
         throw new UnsupportedOperationException("Not implemented yet");
@@ -376,58 +375,63 @@ public class CityRescueImpl implements CityRescue {
     public void cancelIncident(int incidentId) throws IDNotRecognisedException, IllegalStateException {
         int index = -1;
         for(int i=0; i < incidentCount;i++){
-            if(incidents[i].getincidentId() == incidentId){
+            if(incidents.get(i).getincidentId() == incidentId){
                 index = i;
                 break;
             }
         }
         if (index == -1){
-            throw new IDNotRecognisedException();
+            throw new IDNotRecognisedException("Incident not found");
+        } else{
+            if (!(incidents.get(index).getStatus().equals(IncidentType.REPORTED) || incidents.get(index).getStatus().equals(IncidentType.DISPATCHED))){
+                throw new IllegalStateException("Incident must be reported or dispatched to be cancelled");
+            } else{
+                if (incidents.get(index).getStatus().equals(IncidentType.DISPATCHED)){
+                    int unitID=incidents.get(index).getUnitAssignedId()
+                    for (int i=0; i<units.size(); i++){
+                        if (units.get(i).getUnitID()==unitID){
+                            units.get(i).setStatus(UnitStatus.IDLE)
+                        }
+                    }
+                    incidents.get(index).releaseUnit();
+                    incidents.get(index).cancelledIncident();
+                }else{
+                    incidents.get(index).cancelIncident();
+                }
+            }
         }
-        if (!(incidents[index].getStatus().equals(REPORTED))){
-            incidents[index].cancelledIncident();
-        }
-        if (!(incidents[index].getStatus().equals(DISPATCHED))){
-            incidents[index].releaseUnit();
-            incidents[index].cancelledIncident();
-        }
-        else{
-            throw IllegalStateException();
-        }
-
-
     }
 
     @Override
     public void escalateIncident(int incidentId, int newSeverity) throws IDNotRecognisedException, InvalidSeverityException, IllegalStateException {
         int index = -1;
         for(int i=0; i < incidentCount;i++){
-            if(incidents[i].getincidentId() == incidentId){
+            if(incidents.get(i).getincidentId() == incidentId){
                 index = i;
                 break;
             }
         }
         if (index == -1){
-            throw new IDNotRecognisedException();
+            throw new IDNotRecognisedException("ID not found");
+        }else{
+            if (newSeverity <= 1 || newSeverity >=5){
+                throw new InvalidSeverityException("Value used for severity out of range");
+            }else{
+                if (incidents.get(index).getstatus().equals(IncidentType.RESOLVED) || incidents.get(index).getstatus().equals(IncidentType.CANCELLED) ){
+                    throw new IllegalStateException("Incident can no longer be escalated as it has been resolved or cancelled");
+                }else{
+                    incidents.get(index).escalateSeverity(newSeverity);
+                }
+            }
         }
-        if (newSeverity <= 1 || newSeverity >=5){
-            throw new InvalidSeverityException();
-        }
-        if (incidents[index].getstatus()== RESOLVED || incidents[index].getstatus()== CANCELLED ){
-            throw new IllegalStateException();
-        }
-        incidents[index].escalateSeverity(newSeverity);
-        return "Severity updated";
-
-
         throw new UnsupportedOperationException("Not implemented yet");
      }
 
     @Override
     public int[] getIncidentIds(){
-        int[] incidentIdsList = incidentSize;
-        for(int i=0; i < size(stations);i++){
-            stationIdsList[i] = stations[i].getStationId(); 
+        int[] incidentIdsList = new int[incidents.size()];
+        for(int i=0; i < stations.size();i++){
+            stationIdsList[i] = stations.get(i).getStationId(); 
         }
         return stationIdsList;
         throw new UnsupportedOperationException("Not implemented yet");
@@ -454,7 +458,7 @@ public class CityRescueImpl implements CityRescue {
                     shortestManhattan.add(i);
                 }
             }
-        if (shortestManhattan.length() == 1){
+        if (shortestManhattan.size() == 1){
             incidents[shortestManhattan[0]]
         }
 
@@ -466,6 +470,42 @@ public class CityRescueImpl implements CityRescue {
     @Override
     public void tick() {
         // TODO: implement
+        current_tick++
+        ArrayList<Unit> enRouteUnits= new ArrayList<>();
+        for (int i=0; i<units.size(); i++){
+            if units.get(i).getStatus().equals(UnitStatus.EN_ROUTE){
+                enRouteUnits.add(units.get(i))
+            }
+        }
+        for (int x=0; x<enRouteUnits.size(); x++){
+            currrentLoc=enRouteUnits.get(x).getCurrentLocation();
+            ArrayList<int[]> moves=new ArrayList<>();
+            for(int y=0; y<4; y++){
+                switch y{
+                    case 0:
+                        if ((currentLoc[0]-1)>=0){
+                            moves.add({currentLoc[0]-1, currentLoc[0]});
+                        }
+                    case 1:
+                        if ((currentLoc[1]+1)<=getGridSize()[1]){
+                            moves.add({currentLoc[0], currentLoc[0]+1});
+                        }
+                    case 2:
+                        if ((currentLoc[0]+1)<=getGridSize()[0]){
+                            moves.add({currentLoc[0]+1, currentLoc[0]});
+                        }
+                    case 3:
+                        if ((currentLoc[1]-1)>=0){
+                            moves.add({currentLoc[0], currentLoc[0]-1});
+                        }
+                ArrayList<Integer> manhattanDistance=new ArrayList<>();
+                for (int j=0; j<moves.size(); j++){
+                    int[] currentMove=moves.get(j)
+                    manhattanDistance.add([(currentMove[0]-)])
+                }
+                }
+            }
+        }
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

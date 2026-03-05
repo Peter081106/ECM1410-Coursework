@@ -4,8 +4,8 @@ public Incident{
     private int severity;
     private IncidentStatus status;
     private int unitAssignedId;
-    private int x;
-    private int y;
+    private int height;
+    private int width;
 
     public int gettype(){
         return type;
@@ -19,14 +19,14 @@ public Incident{
     public int getstatus(){
         return status;
     }
-    public int getx(){
-        return x;
+    public int getheight(){
+        return height;
     }
-    public int gety(){
-        return y;
+    public int getwidth(){
+        return width;
     }
-    public int unitAssignedId(){
-        return unitAssignedId
+    public int getUnitAssignedId(){
+        return unitAssignedId;
     }
 
     public Incident(IncidentType type, int severity, int x, int y){

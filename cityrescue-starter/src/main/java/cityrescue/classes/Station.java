@@ -5,7 +5,7 @@ public Station(){
     private int width;
     private int maxUnits;
     private int unitCount;
-    private Unit[] units;
+    private List<Unit> units;
 
     public Station(int stationId, String name, int x, int y, int maxUnits){
         this.stationId = stationId;
@@ -14,47 +14,37 @@ public Station(){
         this.width = y;
         this.maxUnits = maxUnits;
         this.unitCount = 0;
-        this.units = new Unit[capacity]
+        this.units = new ArrayList<>();
     }
 
     public int getstationId(){
-        return stationId
+        return stationId;
     }
     public int getname(){
-        return name
+        return name;
     }
     public int getheight(){
-        return height
+        return height;
     }
     public int getwidth(){
-        return width
+        return width;
     }
     public int getmaxUnits(){
-        return maxUnits
+        return maxUnits;
     }
     public int getunitCount(){
-        return unitCount
+        return unitCount;
     }
     public void setmaxUnits(newmaxUnits){
-
-        Units[] newUnits = new unit[newmaxUnits];
-        for (int i = 0; i < unitCount; i++) {
-            newArray[i] = units[i];
-        }
-        this.units = newUnits;
-        this.unit = newmaxUnits;
+        maxUnits=newMaxUnits;
     }
     public void addUnit(Unit unit){
-        for (int i = 0; i < maxUnits; i++) {
-            if (units[i] == null){
-                units[i] = unit;
-            }
-        }
+        units.add(unit);
     }
     public void removeUnit(int unitId){
-        for (int i = 0; i < maxUnits; i++) {
-            if (units[i] == unitId){
-                units[i] = null;
+        for (int i = 0; i < units.size(); i++) {
+            if (units.get(i).getUnitID() == unitId){
+                units.remove(i);
             }
         }
 
