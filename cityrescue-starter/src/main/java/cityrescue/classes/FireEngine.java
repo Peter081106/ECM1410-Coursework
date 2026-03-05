@@ -8,7 +8,7 @@ public class FireEngine extends Unit{
     private int taskTick=4;
     private int ticksCompleted=0;
     public FireEngine(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation);
+        super(id, UnitType.FIRE_ENGINE, home, currentLocation);
     }
 
     public int getTicksToComplete(){
@@ -27,5 +27,9 @@ public class FireEngine extends Unit{
             handle=false;
         }
         return handle;
+    }
+
+    public void incrementWork(){
+        ticksCompleted++;
     }
 }

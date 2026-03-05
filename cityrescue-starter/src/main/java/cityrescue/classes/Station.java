@@ -1,7 +1,6 @@
 package cityrescue.classes;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Station{
     private int stationId;
@@ -45,11 +44,14 @@ public class Station{
     }
     public void addUnit(Unit unit){
         units.add(unit);
+        unitCount++;
     }
     public void removeUnit(int unitId){
         for (int i = 0; i < units.size(); i++) {
             if (units.get(i).getUnitId() == unitId){
                 units.remove(i);
+                unitCount--;
+                return;
             }
         }
     }

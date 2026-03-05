@@ -14,11 +14,13 @@ public abstract class Unit{
 
     public abstract boolean canHandle(IncidentType incident);
     public abstract int getTicksToComplete();
+    public abstract void incrementWork();
 
-    public Unit(int unitID, int homeStation, int[] location){
-        id=unitID;
-        home=homeStation;
-        currentLocation=location;
+    public Unit(int unitID, UnitType type, int homeStation, int[] location){
+        this.id=unitID;
+        this.type=type;
+        this.home=homeStation;
+        this.currentLocation=location;
     }
 
     public int getUnitId(){

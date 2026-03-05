@@ -8,7 +8,7 @@ public class PoliceCar extends Unit{
     private int taskTick=3;
     private int ticksCompleted=0;
     public PoliceCar(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation);
+        super(id, UnitType.POLICE_CAR, home, currentLocation);
     }
 
     public int getTicksToComplete(){
@@ -27,5 +27,9 @@ public class PoliceCar extends Unit{
             handle=false;
         }
         return handle;
+    }
+
+    public void incrementWork(){
+        ticksCompleted++;
     }
 }

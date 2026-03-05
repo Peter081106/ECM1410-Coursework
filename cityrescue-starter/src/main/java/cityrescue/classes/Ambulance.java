@@ -8,15 +8,13 @@ public class Ambulance extends Unit{
     private int taskTick=2;
     private int ticksCompleted=0;
     public Ambulance(int id, int home, int[] currentLocation){
-        super(id, home, currentLocation);
+        super(id, UnitType.AMBULANCE, home, currentLocation);
     }
 
     public int getTicksToComplete(){
         int remainingTicks=taskTick-ticksCompleted;
         if (remainingTicks==0){
             ticksCompleted=0;
-        }else{
-            ticksCompleted++;
         }
         return remainingTicks;
     }
@@ -29,6 +27,10 @@ public class Ambulance extends Unit{
             handle=false;
         }
         return handle;
+    }
+
+    public void incrementWork(){
+        ticksCompleted++;
     }
 }
 
