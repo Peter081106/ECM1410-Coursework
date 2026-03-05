@@ -439,14 +439,25 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public String viewIncident(int incidentId) throws IDNotRecognisedException {
-        // TODO: implement
+        int index = -1;
+        for(int i=0; i < incidentCount;i++){
+            if(incidents[i].getincidentId() == incidentId){
+                index = i;
+                break;
+            }
+        }
+        if (index == -1){
+            throw new IDNotRecognisedException();
+        return "I#"+str(incidentId)+" TYPE="+str(incidents[index].gettype())+" SEV="+str(incidents[index].getseverity())+" LOC=("+str(incidents[index].getwidth())+","+str(incidents[index].getheight())+") STATUS="+str(incidents[index].getstatus())+" UNIT="+str(incidents[index].getunitAssignedId())
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void dispatch() {
+        // creates a list of the indexes of the ids
         int largestDistance = 0
         ArrayList<Integer> shortestManhattan = new ArrayList<Integer>;
+        ArrayList<Integer> sameIds = new ArrayList<Integer>;
         for(int i=0; i < incidentCount;i++){
             if (incidents[i].getstatus.equals((DISPATCHED)){
                 manhattanDistance = (Math.abs(incidents[i].getheight()-incidents[i].getunitAssignedId().getCurrentLocation[0])) + (Math.abs(incidents[i].getwidth()-incidents[i].getunitAssignedId().getCurrentLocation[1]))
@@ -458,10 +469,25 @@ public class CityRescueImpl implements CityRescue {
                     shortestManhattan.add(i);
                 }
             }
+<<<<<<< HEAD
         if (shortestManhattan.size() == 1){
             incidents[shortestManhattan[0]]
+=======
+>>>>>>> 9b7c27e9f521a1c0abd2b4de3acd8f22c0896b54
         }
 
+        if shortestManhattan.length() == 1{
+            lowestId = shortestManhattan[0]
+        }
+
+        if shortestManhattan.length() > 1{
+            int lowestId = shortestManhattan[0];
+            for(int i=0; i < shortestManhattan.length();i++){
+                if (shortestManhattan[i] < lowestId){
+                    lowestId = shortestManhattan[i];
+                }
+            }
+        
         }
 
         throw new ("Not implemented yet");
@@ -511,7 +537,22 @@ public class CityRescueImpl implements CityRescue {
 
     @Override
     public String getStatus() {
-        // TODO: implement
+        
+        String finalGetStatusString = "TICK="+str(current_tick)+" \n
+        STATIONS="+str(stationCount)+" UNITS="+unitIDs.length()+" INCIDENTS="+str(incidentCount)+" OBSTACLES="+str(getBlockedCells().size())+" \n
+        INCIDENTS \n"
+        for(int i=0; i < incidentCount;i++){
+            finalGetStatusString = finalGetStatusString + viewIncident(incidents[i])+"\n"
+        }
+        finalGetStatusString = finalGetStatusString + "UNITS \n"
+        for(int i=0; i < unitIds.length();i++){
+            finalGetStatusString = finalGetStatusString + viewIncident(unitIds[i])+"\n"
+        }
+
+        
+        
+
+        
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }
